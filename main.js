@@ -1,6 +1,5 @@
-// --- FULL RESTORATION VERSION ---
-// Game kamu sudah KEMBALI! Semua fitur Shop, Menu, Animasi, dan Gameplay ada di sini.
-// Saya buat dalam satu Scene (MainScene) agar stabil dan langsung jalan.
+// --- FULL RESTORATION VERSION (GITHUB PAGES PERFECT EDITION) ---
+// Fitur: Layout Auto-Fit Center, Deteksi Dapur Ketat, Sistem Shop, Menu, Animasi, dan Gameplay.
 
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -51,8 +50,11 @@ class MainScene extends Phaser.Scene {
         this.anims.create({ key: 'shine_anim', frames: this.anims.generateFrameNumbers('shine'), frameRate: 8, repeat: -1 });
 
         // --- MAP & PHYSICS ---
+        const { width, height } = this.scale;
         const MAP_W = 1402; const MAP_H = 1122;
-        this.add.image(0, 0, 'indoor').setOrigin(0, 0);
+        
+        // PERBAIKAN: Menyesuaikan ukuran display background indoor agar langsung nge-zoom pas memenuhi layar game
+        this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(width, height);
         this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
 
         this.walls = this.physics.add.staticGroup();
@@ -93,7 +95,6 @@ class MainScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
 
         // --- UI HUD ---
-        const { width, height } = this.scale;
         this.add.rectangle(0, 0, width, 70, 0x3e2723, 0.9).setOrigin(0).setScrollFactor(0).setDepth(1000);
         this.coinText = this.add.text(20, 10, `💰 Coins: 0`, { fontSize: '22px', fill: '#ffd54f', fontStyle: 'bold' }).setScrollFactor(0).setDepth(1001);
         this.levelText = this.add.text(width - 150, 10, `⭐ Level: 1`, { fontSize: '22px', fill: '#fff', fontStyle: 'bold' }).setScrollFactor(0).setDepth(1001);
@@ -271,9 +272,16 @@ class MainScene extends Phaser.Scene {
     }
 }
 
+// PERBAIKAN: Konfigurasi Scale Mode menggunakan FIT & CENTER_BOTH agar game responsif dan rapi pas di tengah layar GitHub Pages
 const config = {
     type: Phaser.AUTO,
-    scale: { mode: Phaser.Scale.RESIZE, parent: 'game-container', width: '100%', height: '100%' },
+    scale: { 
+        mode: Phaser.Scale.FIT, 
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        parent: 'game-container', 
+        width: 1280, 
+        height: 720 
+    },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
     scene: [MainScene]
