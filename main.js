@@ -54,8 +54,11 @@ class MainScene extends Phaser.Scene {
         const MAP_W = 1402; const MAP_H = 1122;
         
         // PERBAIKAN: Menyesuaikan ukuran display background indoor agar langsung nge-zoom pas memenuhi layar game
-        this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(width, height);
-        this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
+        // PERBAIKAN: Paksa gambar indoor nge-zoom pas sesuai resolusi dasar game (1280x720)
+this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(1280, 720);
+
+// PERBAIKAN: Batas dunia game disamakan dengan ukuran gambar yang sudah di-zoom biar Amelia nggak jalan tembus keluar map
+this.physics.world.setBounds(0, 0, 1280, 720);
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
