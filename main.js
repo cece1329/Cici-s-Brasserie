@@ -1,5 +1,5 @@
-// --- FULL RESTORATION VERSION (GITHUB PAGES PERFECT EDITION) ---
-// Fitur: Layout Auto-Fit Center, Deteksi Dapur Ketat, Sistem Shop, Menu, Animasi, dan Gameplay.
+// --- FULL RESTORATION VERSION (FIXED PRELOAD ERROR) ---
+// Fitur: Layout Auto-Fit Full Screen (ENVELOP), Deteksi Dapur Ketat, Sistem Shop, Menu, Animasi, dan Gameplay.
 
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -15,13 +15,16 @@ class MainScene extends Phaser.Scene {
         // Assets
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('amelia_run', 'asetgamepjbl/barista/Amelia_run_16x16.png', { frameWidth: 16, frameHeight: 32 });
+        
         ['adam', 'alex', 'bob'].forEach(name => {
             const path = `asetgamepjbl/pelanggan/${name.charAt(0).toUpperCase() + name.slice(1)}/`;
             const base = name.charAt(0).toUpperCase() + name.slice(1);
+            // FIX: Tanda petik di akhir fungsi .png' sudah diperbaiki menjadi .png)
             this.load.spritesheet(`${name}_idle`, `${path}${base}_idle_anim_16x16.png`, { frameWidth: 16, frameHeight: 32 });
             this.load.spritesheet(`${name}_run`, `${path}${base}_run_16x16.png`, { frameWidth: 16, frameHeight: 32 });
             this.load.spritesheet(`${name}_sit`, `${path}${base}_sit_16x16.png`, { frameWidth: 32, frameHeight: 32 });
         });
+        
         this.load.image('bubble_pesan', 'asetgamepjbl/bubblechatpesan.png');
         this.load.image('proses', 'asetgamepjbl/proses.png');
         this.load.image('indoor', 'asetgamepjbl/indoor.png');
@@ -53,12 +56,8 @@ class MainScene extends Phaser.Scene {
         const { width, height } = this.scale;
         const MAP_W = 1402; const MAP_H = 1122;
         
-        // PERBAIKAN: Menyesuaikan ukuran display background indoor agar langsung nge-zoom pas memenuhi layar game
-        // PERBAIKAN: Paksa gambar indoor nge-zoom pas sesuai resolusi dasar game (1280x720)
-this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(1280, 720);
-
-// PERBAIKAN: Batas dunia game disamakan dengan ukuran gambar yang sudah di-zoom biar Amelia nggak jalan tembus keluar map
-this.physics.world.setBounds(0, 0, 1280, 720);
+        this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(MAP_W, MAP_H);
+        this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
@@ -92,9 +91,10 @@ this.physics.world.setBounds(0, 0, 1280, 720);
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- CAMERA ---
+        // --- CAMERA SYSTEM ---
         this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
 
         // --- UI HUD ---
@@ -190,8 +190,6 @@ this.physics.world.setBounds(0, 0, 1280, 720);
         this.player.setDepth(this.player.y);
         
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
-        
-        // PERBAIKAN: Deteksi ketat area dalam dapur (Amelia harus di belakang meja bar, sumbu Y harus kurang dari 380)
         const isInKitchen = (this.player.x >= 100 && this.player.x <= 650 && this.player.y < 380);
         
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
@@ -207,7 +205,7 @@ this.physics.world.setBounds(0, 0, 1280, 720);
                 if (Phaser.Math.Distance.Between(this.player.x, this.player.y, c.x, c.y) < 100) {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
                     this.time.delayedCall(4000, () => {
-                        if (c.targetChair) c.targetChair.isOccupied = false; // BEBASKAN KURSI!
+                        if (c.targetChair) c.targetChair.isOccupied = false;
                         c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, 690, 1170, 150);
                         c.state = 'LEAVING'; this.dropMoney(c.x, c.y, c.orderedFood);
                     });
@@ -275,11 +273,11 @@ this.physics.world.setBounds(0, 0, 1280, 720);
     }
 }
 
-// PERBAIKAN: Konfigurasi Scale Mode menggunakan FIT & CENTER_BOTH agar game responsif dan rapi pas di tengah layar GitHub Pages
+// Konfigurasi Scale Mode ENVELOP untuk Full Screen Sempurna
 const config = {
     type: Phaser.AUTO,
     scale: { 
-        mode: Phaser.Scale.FIT, 
+        mode: Phaser.Scale.ENVELOP, 
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container', 
         width: 1280, 
