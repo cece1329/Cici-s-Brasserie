@@ -209,9 +209,16 @@ class MainScene extends Phaser.Scene {
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
         
-        // Group E (Meja Vas Kecil Samping Vending Machine) -> Dihapus agar tidak menghalangi jalan di sebelah kanan
+        // Group E (Meja Vas Kecil Samping Vending Machine)
+        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
         
-        // 8. DEKORASI LAINNYA (Dihapus kotak merahnya agar Amelia bisa leluasa jalan di bagian bawah)
+        // 8. DEKORASI LAINNYA
+        // Tanaman Kiri Bawah
+        addWall(0, realMapHeight * 0.84, realMapWidth * 0.08, realMapHeight * 0.16);
+        // Tanaman Kanan Bawah
+        addWall(realMapWidth * 0.92, realMapHeight * 0.84, realMapWidth * 0.08, realMapHeight * 0.16);
+        // Sofa Bawah (Dekat pintu masuk)
+        addWall(realMapWidth * 0.29, realMapHeight * 0.86, realMapWidth * 0.12, realMapHeight * 0.11);
 
         // --- STATUS GAME ---
         this.coins = 0;
