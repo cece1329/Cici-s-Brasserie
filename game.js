@@ -189,7 +189,6 @@ class MainScene extends Phaser.Scene {
 
         // 5. STAIRS (Tangga Kanan) -> Digeser mepet ke kanan agar tidak menutupi karpet oval
         addWall(realMapWidth * 0.82, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.08);
-        addWall(realMapWidth * 0.81, realMapHeight * 0.35, realMapWidth * 0.04, realMapHeight * 0.08);
 
         // 6. VENDING MACHINE (Mesin Minuman Kanan)
         addWall(realMapWidth * 0.87, realMapHeight * 0.3, realMapWidth * 0.13, realMapHeight * 0.32);
@@ -206,6 +205,9 @@ class MainScene extends Phaser.Scene {
 
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
+
+        // Group E (Meja Lampu Samping Vending Machine) -> Dikembalikan
+        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
 
 
 
