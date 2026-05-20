@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: NO-DISTORTION & BUG-FREE RESIZE EDITION ---
+// --- CICI'S BRASSERIE: THE PERFECT DYNAMIC & BUG-FREE EDITION ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -21,7 +21,7 @@ class IntroScene extends Phaser.Scene {
         let bg = this.add.image(width / 2, height / 2, 'intro_bg').setOrigin(0.5);
         let scaleX = width / bg.width;
         let scaleY = height / bg.height;
-        let scale = Math.max(scaleX, scaleY); // Ambil skala terbesar agar menutup layar proporsional
+        let scale = Math.max(scaleX, scaleY);
         bg.setScale(scale);
 
         this.add.rectangle(0, 0, width, height, 0x2d1b18, 0.55).setOrigin(0);
@@ -70,7 +70,7 @@ class IntroScene extends Phaser.Scene {
 
         let tutContent = this.add.text(width / 2, height / 2 - 10,
             "🏃 KONTROL GERAK:\nGunakan tombol W, A, S, D di keyboard untuk menggerakkan Amelia keliling kafe.\n\n" +
-            "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar (X: 465) untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
+            "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
             "🛒 UPGRADE KAFE:\nGunakan koinmu di menu SHOP untuk membuka resep menu baru!\n" +
             "⏸️ PAUSE MENU:\nTekan tombol P, ESC, atau klik tombol PAUSE di navbar.", {
             fontSize: '14px', fill: '#ffffff', fontFamily: 'Courier New', lineHeight: 1.4, wordWrap: { width: 690 }
@@ -155,13 +155,16 @@ class MainScene extends Phaser.Scene {
         // --- MAP & PHYSICS (ANTI-GEPENG FIX) ---
         this.mapBg = this.add.image(width / 2, height / 2, 'indoor').setOrigin(0.5);
 
-        // Kalkulasi rasio aspek pintar agar gambar proporsional, tidak ditarik lonjong/gepeng
         let sX = width / this.mapBg.width;
         let sY = height / this.mapBg.height;
         let perfectScale = Math.max(sX, sY);
         this.mapBg.setScale(perfectScale);
 
-        this.physics.world.setBounds(0, 0, width, height);
+        // Menghitung dimensi map real setelah di-scale
+        const realMapWidth = this.mapBg.width * perfectScale;
+        const realMapHeight = this.mapBg.height * perfectScale;
+
+        this.physics.world.setBounds(0, 0, realMapWidth, realMapHeight);
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
@@ -169,35 +172,44 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(r, true);
             this.walls.add(r);
         };
-        addWall(0, 0, width, 20); addWall(0, height - 20, width, 20); addWall(0, 0, 20, height); addWall(width - 20, 0, 20, height);
-        addWall(width * 0.07, height * 0.33, width * 0.4, height * 0.07);
-        addWall(width * 0.46, height * 0.07, 40, height * 0.26);
-        addWall(width * 0.07, 0, width * 0.4, height * 0.23);
+        addWall(0, 0, realMapWidth, 20);
+        addWall(0, realMapHeight - 20, realMapWidth, 20);
+        addWall(0, 0, 20, realMapHeight);
+        addWall(realMapWidth - 20, 0, 20, realMapHeight);
 
-        // --- STATUS GAME ---
-        this.coins = 750; this.level = 1; this.exp = 0; this.expToNextLevel = 50;
+        addWall(realMapWidth * 0.07, realMapHeight * 0.33, realMapWidth * 0.4, realMapHeight * 0.07);
+        addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
+        addWall(realMapWidth * 0.07, 0, realMapWidth * 0.4, realMapHeight * 0.23);
+
+        // --- STATUS GAME (COIN DINAIKKAN DARI 0 SEKARANG!) ---
+        this.coins = 0;
+        this.level = 1;
+        this.exp = 0;
+        this.expToNextLevel = 50;
         this.baseSpeed = 250;
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
         this.allChairs = [
-            { x: width * 0.08, y: height * 0.42, isOccupied: false, minLevel: 1 },
-            { x: width * 0.23, y: height * 0.42, isOccupied: false, minLevel: 1 },
-            { x: width * 0.25, y: height * 0.66, isOccupied: false, minLevel: 2 },
-            { x: width * 0.15, y: height * 0.56, isOccupied: false, minLevel: 3 },
-            { x: width * 0.55, y: height * 0.62, isOccupied: false, minLevel: 4 }
+            { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
+            { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
+            { x: realMapWidth * 0.25, y: realMapHeight * 0.66, isOccupied: false, minLevel: 2 },
+            { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
+            { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
         ];
 
         // --- PLAYER (AMELIA) ---
-        this.player = this.physics.add.sprite(width * 0.21, height * 0.28, 'amelia_idle').setScale(4.5);
+        this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
         this.player.setCollideWorldBounds(true);
         this.player.body.setSize(8, 6).setOffset(4, 26);
         this.player.setDepth(100);
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        this.cameras.main.setBounds(0, 0, width, height);
+        // --- SETTING KAMERA UTK FOLLOW AMELIA ---
+        this.cameras.main.setBounds(0, 0, realMapWidth, realMapHeight);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -295,7 +307,7 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
 
         this.isFoodOnCounter = false; this.counterFoodKey = '';
-        this.counterFoodSprite = this.add.container(width * 0.33, height * 0.31).setVisible(false).setDepth(80);
+        this.counterFoodSprite = this.add.container(realMapWidth * 0.33, realMapHeight * 0.31).setVisible(false).setDepth(80);
         this.counterPlateImg = this.add.image(0, 5, 'plate').setScale(2.5);
         this.counterFoodImg = this.add.image(0, -5, 'food_coffee').setScale(1.2);
         this.counterFoodSprite.add([this.counterPlateImg, this.counterFoodImg]);
@@ -303,9 +315,6 @@ class MainScene extends Phaser.Scene {
         this.updateUI();
     }
 
-    // ==========================================
-    // FIX BUG UNFREEZE CUSTOMER PAS RESUME GAME
-    // ==========================================
     togglePauseGame() {
         this.isGamePaused = !this.isGamePaused;
         if (this.isGamePaused) {
@@ -313,8 +322,6 @@ class MainScene extends Phaser.Scene {
             this.physics.world.pause();
             this.customerTimer.paused = true;
             this.customerGroup.getChildren().forEach(c => {
-                c.savedVelocityX = c.body.velocity.x; // Catat kecepatan x terakhir sebelum diam
-                c.savedVelocityY = c.body.velocity.y; // Catat kecepatan y terakhir sebelum diam
                 c.setVelocity(0);
                 c.anims.stop();
             });
@@ -324,16 +331,18 @@ class MainScene extends Phaser.Scene {
             this.customerTimer.paused = false;
             this.pauseElements.forEach(el => el.setVisible(false));
 
-            // AKTIFKAN KEMBALI SEMUA CUSTOMER YANG BEKU
+            // UNFREEZE LOGIC UNTUK PELANGGAN
+            const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+            const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
             this.customerGroup.getChildren().forEach(c => {
                 if (c.state === 'ARRIVING') {
                     c.play(`${c.customerName}_run_up`, true);
-                    this.physics.moveTo(c, c.tx, c.ty, 150); // Paksa jalan lagi ke target kursi
+                    this.physics.moveTo(c, c.tx, c.ty, 150);
                 } else if (c.state === 'LEAVING') {
                     c.play(`${c.customerName}_run_down`, true);
-                    this.physics.moveTo(c, this.scale.width * 0.49, this.scale.height + 50, 150); // Paksa jalan keluar
+                    this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
                 } else if (c.state === 'ORDERING' || c.state === 'WAITING' || c.state === 'EATING') {
-                    c.play(`${c.customerName}_sit`, true); // Aktifkan animasi duduk kembali
+                    c.play(`${c.customerName}_sit`, true);
                 }
             });
         }
@@ -346,8 +355,8 @@ class MainScene extends Phaser.Scene {
 
         if (this.isGamePaused) return;
 
-        const width = this.scale.width;
-        const height = this.scale.height;
+        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
 
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
@@ -361,12 +370,12 @@ class MainScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
 
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
-        const isInKitchen = (this.player.x >= width * 0.07 && this.player.x <= width * 0.46 && this.player.y < height * 0.33);
+        const isInKitchen = (this.player.x >= realMapWidth * 0.07 && this.player.x <= realMapWidth * 0.46 && this.player.y < realMapHeight * 0.33);
 
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
         if (this.isFoodOnCounter && !this.hasFood) {
-            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, width * 0.33, height * 0.31);
+            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, realMapWidth * 0.33, realMapHeight * 0.31);
             if (distanceToCounter < 110) {
                 this.isFoodOnCounter = false; this.counterFoodSprite.setVisible(false); this.hasFood = true;
                 this.heldFoodKey = this.counterFoodKey; this.heldFoodImg.setTexture(this.heldFoodKey);
@@ -386,11 +395,11 @@ class MainScene extends Phaser.Scene {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
                     this.time.delayedCall(4000, () => {
                         if (c.targetChair) c.targetChair.isOccupied = false;
-                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, width * 0.49, height + 50, 150);
+                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
                         c.state = 'LEAVING'; this.dropMoney(c.x, c.y, c.orderedFood);
                     });
                 }
-            } else if (c.state === 'LEAVING' && c.y > height) { c.bubble.destroy(); c.destroy(); }
+            } else if (c.state === 'LEAVING' && c.y > realMapHeight) { c.bubble.destroy(); c.destroy(); }
         });
     }
 
@@ -413,14 +422,14 @@ class MainScene extends Phaser.Scene {
 
     spawnCustomer() {
         if (this.isGamePaused) return;
-        const width = this.scale.width;
-        const height = this.scale.height;
+        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
 
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
         freeChair.isOccupied = true;
         const name = ['adam', 'alex', 'bob'][Phaser.Math.Between(0, 2)];
-        const customer = this.physics.add.sprite(width * 0.49, height + 20, `${name}_run`).setScale(4.5);
+        const customer = this.physics.add.sprite(realMapWidth * 0.49, realMapHeight + 20, `${name}_run`).setScale(4.5);
         customer.customerName = name; customer.targetChair = freeChair; customer.state = 'ARRIVING';
         customer.tx = freeChair.x; customer.ty = freeChair.y;
         customer.bubble = this.add.container(0, 0).setVisible(false).setDepth(200);
