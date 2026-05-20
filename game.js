@@ -11,11 +11,27 @@ class IntroScene extends Phaser.Scene {
     preload() {
         this.load.image('intro_bg', 'asetgamepjbl/intro.png');
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
+
+        // --- AUDIO SYSTEM LOAD ---
+        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/bodenstaendig_2000_in_rock_4bit.mp3');
+        this.load.audioSprite('sfx', 
+            'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/fx_mixdown.json',
+            [
+                'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/fx_mixdown.ogg',
+                'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/fx_mixdown.mp3'
+            ]
+        );
     }
 
     create() {
         const width = this.scale.width;
         const height = this.scale.height;
+
+        // Play BGM if not already playing
+        if (!this.sound.get('bgm')) {
+            let bgm = this.sound.add('bgm', { loop: true, volume: 0.35 });
+            bgm.play();
+        }
 
         // Trik anti-gepeng untuk background Intro
         let bg = this.add.image(width / 2, height / 2, 'intro_bg').setOrigin(0.5);
@@ -59,7 +75,10 @@ class IntroScene extends Phaser.Scene {
         howToBtn.on('pointerover', () => howToBtn.setStyle({ backgroundColor: '#5d4037' }));
         howToBtn.on('pointerout', () => howToBtn.setStyle({ backgroundColor: '#8d6e63' }));
 
-        startBtn.on('pointerdown', () => this.scene.start('MainScene'));
+        startBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.scene.start('MainScene');
+        });
 
         let tutorialGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
         let tutBg = this.add.rectangle(width / 2, height / 2, 750, 430, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
@@ -84,8 +103,14 @@ class IntroScene extends Phaser.Scene {
         closeTutBtn.on('pointerout', () => closeTutBtn.setStyle({ backgroundColor: '#d32f2f' }));
         tutorialGroup.add([tutBg, tutTitle, tutContent, closeTutBtn]);
 
-        howToBtn.on('pointerdown', () => tutorialGroup.setVisible(true));
-        closeTutBtn.on('pointerdown', () => tutorialGroup.setVisible(false));
+        howToBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            tutorialGroup.setVisible(true);
+        });
+        closeTutBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            tutorialGroup.setVisible(false);
+        });
 
         this.add.text(width / 2, height - 25, "© 2026 Kafe Cici Project. All Rights Reserved.", { fontSize: '12px', fill: '#b0bec5', fontFamily: 'Arial' }).setOrigin(0.5);
     }
@@ -229,6 +254,12 @@ class MainScene extends Phaser.Scene {
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
+        // BGM check
+        if (!this.sound.get('bgm')) {
+            let bgm = this.sound.add('bgm', { loop: true, volume: 0.35 });
+            bgm.play();
+        }
+
         this.allChairs = [
             { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 }, // Bar Stool
             { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 }, // Bar Stool
@@ -273,7 +304,10 @@ class MainScene extends Phaser.Scene {
         this.menuBtn = this.add.text(width / 2 + 130, 35, "📋 MENU", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
 
         this.hudContainer.add([this.navBg, this.coinText, this.levelText, this.expBar, this.shopBtn, this.pauseBtn, this.menuBtn]);
-        this.pauseBtn.on('pointerdown', () => this.togglePauseGame());
+        this.pauseBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.togglePauseGame();
+        });
 
         // --- SHOP & MENU LOGIC ---
         this.shopContainer = this.add.container(uiX, uiY).setScrollFactor(0).setDepth(2000).setScale(uiScale).setVisible(false);
@@ -295,6 +329,9 @@ class MainScene extends Phaser.Scene {
                 if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
                     this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
                     text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
+                    this.sound.playAudioSprite('sfx', 'ping'); // Play unlock sound
+                } else {
+                    this.sound.playAudioSprite('sfx', 'numkey'); // Fail sound / standard click
                 }
             });
         };
@@ -303,8 +340,16 @@ class MainScene extends Phaser.Scene {
         const closeBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0);
         this.shopContainer.add(closeBtn);
         this.shopElements.push(closeBtn);
-        closeBtn.on('pointerdown', () => this.shopContainer.setVisible(false));
-        this.shopBtn.on('pointerdown', () => { if (this.isGamePaused) return; this.menuContainer.setVisible(false); this.shopContainer.setVisible(true); });
+        closeBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.shopContainer.setVisible(false);
+        });
+        this.shopBtn.on('pointerdown', () => {
+            if (this.isGamePaused) return;
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.menuContainer.setVisible(false);
+            this.shopContainer.setVisible(true);
+        });
 
         this.menuContainer = this.add.container(uiX, uiY).setScrollFactor(0).setDepth(2000).setScale(uiScale).setVisible(false);
         this.menuElements = [];
@@ -316,6 +361,7 @@ class MainScene extends Phaser.Scene {
 
         this.menuBtn.on('pointerdown', () => {
             if (this.isGamePaused) return;
+            this.sound.playAudioSprite('sfx', 'numkey');
             this.shopContainer.setVisible(false);
             this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
             this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
@@ -329,7 +375,10 @@ class MainScene extends Phaser.Scene {
                 this.menuElements.push(icon, text);
             });
         });
-        closeMenuBtn.on('pointerdown', () => this.menuContainer.setVisible(false));
+        closeMenuBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.menuContainer.setVisible(false);
+        });
 
         // --- POP-UP OVERLAY PAUSE ---
         this.pauseContainer = this.add.container(uiX, uiY).setScrollFactor(0).setDepth(10000).setScale(uiScale).setVisible(false);
@@ -342,9 +391,18 @@ class MainScene extends Phaser.Scene {
 
         this.pauseContainer.add([pBg, pTitle, btnResume, btnRestart, btnExit]);
         this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
-        btnResume.on('pointerdown', () => this.togglePauseGame());
-        btnRestart.on('pointerdown', () => this.scene.restart());
-        btnExit.on('pointerdown', () => this.scene.start('IntroScene'));
+        btnResume.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.togglePauseGame();
+        });
+        btnRestart.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.scene.restart();
+        });
+        btnExit.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.scene.start('IntroScene');
+        });
 
         // --- GAMEPLAY ELEMENTS & GROUPS ---
         this.customerGroup = this.physics.add.group();
@@ -365,7 +423,10 @@ class MainScene extends Phaser.Scene {
         this.heldContainer = this.add.container(0, 0).setVisible(false).setDepth(150);
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
 
-        this.cookBtn.on('pointerdown', () => this.startCooking());
+        this.cookBtn.on('pointerdown', () => {
+            this.sound.playAudioSprite('sfx', 'numkey');
+            this.startCooking();
+        });
         this.customerTimer = this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
         this.spawnCustomer();
 
@@ -444,6 +505,7 @@ class MainScene extends Phaser.Scene {
                 this.isFoodOnCounter = false; this.counterFoodSprite.setVisible(false); this.hasFood = true;
                 this.heldFoodKey = this.counterFoodKey; this.heldFoodImg.setTexture(this.heldFoodKey);
                 this.heldContainer.setVisible(true);
+                this.sound.playAudioSprite('sfx', 'squit', { volume: 0.5 });
             }
         }
 
@@ -457,6 +519,7 @@ class MainScene extends Phaser.Scene {
             } else if (c.state === 'WAITING' && this.hasFood && this.heldFoodKey === c.orderedFood) {
                 if (Phaser.Math.Distance.Between(this.player.x, this.player.y, c.x, c.y) < 100) {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
+                    this.sound.playAudioSprite('sfx', 'squit', { volume: 0.5 });
                     this.time.delayedCall(4000, () => {
                         if (c.targetChair) c.targetChair.isOccupied = false;
                         c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
@@ -473,6 +536,7 @@ class MainScene extends Phaser.Scene {
             let dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y);
             if (dist < 180) { // Jarak ambil otomatis
                 m.isCollected = true;
+                this.sound.playAudioSprite('sfx', 'escape', { volume: 0.4 });
                 let val = m.coinValue;
                 let startX = m.x; let startY = m.y;
                 m.destroy(); // Hancurkan koin fisik di meja
@@ -496,6 +560,7 @@ class MainScene extends Phaser.Scene {
                     },
                     onComplete: () => {
                         flyingCoin.destroy();
+                        this.sound.playAudioSprite('sfx', 'ping', { volume: 0.6 });
                         this.coins += val;
                         this.gainExp(20);
                         this.updateUI();
@@ -516,6 +581,7 @@ class MainScene extends Phaser.Scene {
         if (this.exp >= this.expToNextLevel) {
             this.exp -= this.expToNextLevel; this.level++;
             this.expToNextLevel = Math.floor(this.expToNextLevel * 1.5); this.baseSpeed += 15;
+            this.sound.playAudioSprite('sfx', 'meow', { volume: 0.9 });
             const lvUp = this.add.text(this.player.x, this.player.y - 50, "LEVEL UP!", { fontSize: '32px', color: '#ffeb3b', fontStyle: 'bold' }).setOrigin(0.5);
             this.tweens.add({ targets: lvUp, y: lvUp.y - 100, alpha: 0, duration: 2000, onComplete: () => lvUp.destroy() });
         }
@@ -546,7 +612,11 @@ class MainScene extends Phaser.Scene {
         customer.bubble.add([bg, this.add.image(0, -12, customer.orderedFood).setScale(1.5)]);
         bg.on('pointerdown', () => {
             if (this.isGamePaused) return;
-            if (customer.state === 'ORDERING') { customer.bubble.setVisible(false); customer.state = 'NEEDS_COOKING'; }
+            if (customer.state === 'ORDERING') {
+                this.sound.playAudioSprite('sfx', 'numkey');
+                customer.bubble.setVisible(false);
+                customer.state = 'NEEDS_COOKING';
+            }
         });
         this.customerGroup.add(customer);
         customer.play(`${name}_run_up`);
@@ -564,6 +634,7 @@ class MainScene extends Phaser.Scene {
                 this.isFoodOnCounter = true; this.counterFoodKey = target.orderedFood;
                 this.counterFoodImg.setTexture(this.counterFoodKey); this.counterFoodSprite.setVisible(true);
                 target.state = 'WAITING';
+                this.sound.playAudioSprite('sfx', 'boss hit', { volume: 0.6 });
             });
         }
     }
