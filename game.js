@@ -33,10 +33,18 @@ class IntroScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // Play BGM if not already playing
-        if (!this.sound.get('bgm')) {
-            let bgm = this.sound.add('bgm', { loop: true, volume: 0.35 });
+        // Inisialisasi Registry Pengaturan Suara jika belum ada
+        if (this.registry.get('bgmVolume') === undefined) this.registry.set('bgmVolume', 0.35);
+        if (this.registry.get('bgmMuted') === undefined) this.registry.set('bgmMuted', false);
+
+        // Play BGM if not already playing, and sync volume
+        let bgm = this.sound.get('bgm');
+        let volume = this.registry.get('bgmMuted') ? 0 : this.registry.get('bgmVolume');
+        if (!bgm) {
+            bgm = this.sound.add('bgm', { loop: true, volume: volume });
             bgm.play();
+        } else {
+            bgm.setVolume(volume);
         }
 
         // Trik anti-gepeng untuk background Intro
@@ -116,6 +124,88 @@ class IntroScene extends Phaser.Scene {
         closeTutBtn.on('pointerdown', () => {
             this.sound.play('click_sfx', { volume: 0.7 });
             tutorialGroup.setVisible(false);
+        });
+
+        // --- SETTINGS BUTTON ---
+        let settingsBtn = this.add.text(width / 2, height / 2 + 245, " ⚙️ SETTINGS ⚙️ ", {
+            fontSize: '20px', fill: '#fff3e0', backgroundColor: '#5d4037', padding: { x: 18, y: 8 }, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        settingsBtn.on('pointerover', () => settingsBtn.setStyle({ backgroundColor: '#4e342e' }));
+        settingsBtn.on('pointerout', () => settingsBtn.setStyle({ backgroundColor: '#5d4037' }));
+
+        // --- SETTINGS POPUP SYSTEM (INTRO) ---
+        let settingsGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
+        let setBg = this.add.rectangle(width / 2, height / 2, 450, 320, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
+
+        let setTitle = this.add.text(width / 2, height / 2 - 110, "⚙️ PENGATURAN SUARA", {
+            fontSize: '24px', fontStyle: 'bold', fill: '#ffb74d', fontFamily: 'Courier New'
+        }).setOrigin(0.5);
+
+        let musicToggleBtn = this.add.text(width / 2, height / 2 - 30, "", {
+            fontSize: '18px', fill: '#ffffff', padding: 10, fontFamily: 'Courier New'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        let volText = this.add.text(width / 2, height / 2 + 40, "", {
+            fontSize: '18px', fill: '#ffffff', fontFamily: 'Courier New'
+        }).setOrigin(0.5);
+
+        let volDownBtn = this.add.text(width / 2 - 120, height / 2 + 40, " [-] ", {
+            fontSize: '18px', fill: '#ffffff', backgroundColor: '#d84315', padding: 5, fontFamily: 'Courier New'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        let volUpBtn = this.add.text(width / 2 + 120, height / 2 + 40, " [+] ", {
+            fontSize: '18px', fill: '#ffffff', backgroundColor: '#2e7d32', padding: 5, fontFamily: 'Courier New'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        let closeSetBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", {
+            fontSize: '18px', fill: '#ffffff', backgroundColor: '#d32f2f', padding: 8, fontFamily: 'Courier New'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        settingsGroup.add([setBg, setTitle, musicToggleBtn, volText, volDownBtn, volUpBtn, closeSetBtn]);
+
+        const updateBgmSettings = () => {
+            let muted = this.registry.get('bgmMuted');
+            let volume = this.registry.get('bgmVolume');
+            musicToggleBtn.setText(`🎵 Musik: ${muted ? 'OFF' : 'ON'}`);
+            musicToggleBtn.setStyle({ backgroundColor: muted ? '#c62828' : '#2e7d32' });
+            volText.setText(`Volume: ${Math.round(volume * 100)}%`);
+            let currentBgm = this.sound.get('bgm');
+            if (currentBgm) {
+                currentBgm.setVolume(muted ? 0 : volume);
+            }
+        };
+
+        musicToggleBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let muted = !this.registry.get('bgmMuted');
+            this.registry.set('bgmMuted', muted);
+            updateBgmSettings();
+        });
+
+        volDownBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let volume = Math.max(0, (this.registry.get('bgmVolume') ?? 0.35) - 0.05);
+            this.registry.set('bgmVolume', volume);
+            updateBgmSettings();
+        });
+
+        volUpBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let volume = Math.min(1.0, (this.registry.get('bgmVolume') ?? 0.35) + 0.05);
+            this.registry.set('bgmVolume', volume);
+            updateBgmSettings();
+        });
+
+        closeSetBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            settingsGroup.setVisible(false);
+        });
+
+        settingsBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            settingsGroup.setVisible(true);
+            updateBgmSettings();
         });
 
         this.add.text(width / 2, height - 25, "© 2026 Kafe Cici Project. All Rights Reserved.", { fontSize: '12px', fill: '#b0bec5', fontFamily: 'Arial' }).setOrigin(0.5);
@@ -389,14 +479,69 @@ class MainScene extends Phaser.Scene {
         // --- POP-UP OVERLAY PAUSE ---
         this.pauseContainer = this.add.container(uiX, uiY).setScrollFactor(0).setDepth(10000).setScale(uiScale).setVisible(false);
         this.pauseElements = [];
-        let pBg = this.add.rectangle(width / 2, height / 2, 450, 380, 0x4e342e, 0.95).setStrokeStyle(5, 0xf48fb1).setScrollFactor(0);
-        let pTitle = this.add.text(width / 2, height / 2 - 120, "KAFE DI-ISTIRAHATKAN", { fontSize: '28px', fontStyle: 'bold', fill: '#fff3e0', fontFamily: 'Courier New' }).setOrigin(0.5).setScrollFactor(0);
-        let btnResume = this.add.text(width / 2, height / 2 - 25, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
-        let btnRestart = this.add.text(width / 2, height / 2 + 40, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
-        let btnExit = this.add.text(width / 2, height / 2 + 105, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        let pBg = this.add.rectangle(width / 2, height / 2, 450, 430, 0x4e342e, 0.95).setStrokeStyle(5, 0xf48fb1).setScrollFactor(0);
+        let pTitle = this.add.text(width / 2, height / 2 - 150, "KAFE DI-ISTIRAHATKAN", { fontSize: '28px', fontStyle: 'bold', fill: '#fff3e0', fontFamily: 'Courier New' }).setOrigin(0.5).setScrollFactor(0);
+        
+        // --- INTEGRATED VOLUME CONTROLS (MAIN GAME) ---
+        let isMuted = this.registry.get('bgmMuted') || false;
+        let pMusicToggleBtn = this.add.text(width / 2 - 90, height / 2 - 85, `🎵 Musik: ${isMuted ? 'OFF' : 'ON'}`, {
+            fontSize: '14px', fill: '#ffffff', backgroundColor: isMuted ? '#c62828' : '#2e7d32', padding: 8, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
 
-        this.pauseContainer.add([pBg, pTitle, btnResume, btnRestart, btnExit]);
-        this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
+        let volVal = Math.round((this.registry.get('bgmVolume') ?? 0.35) * 100);
+        let pVolText = this.add.text(width / 2 + 80, height / 2 - 85, `Vol: ${volVal}%`, {
+            fontSize: '14px', fill: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0);
+
+        let pVolDownBtn = this.add.text(width / 2 + 15, height / 2 - 85, "[-]", {
+            fontSize: '14px', fill: '#ffffff', backgroundColor: '#d84315', padding: 6, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+
+        let pVolUpBtn = this.add.text(width / 2 + 140, height / 2 - 85, "[+]", {
+            fontSize: '14px', fill: '#ffffff', backgroundColor: '#2e7d32', padding: 6, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+
+        let btnResume = this.add.text(width / 2, height / 2 - 15, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        let btnRestart = this.add.text(width / 2, height / 2 + 50, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        let btnExit = this.add.text(width / 2, height / 2 + 115, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+
+        this.pauseContainer.add([pBg, pTitle, pMusicToggleBtn, pVolText, pVolDownBtn, pVolUpBtn, btnResume, btnRestart, btnExit]);
+        this.pauseElements = [pBg, pTitle, pMusicToggleBtn, pVolText, pVolDownBtn, pVolUpBtn, btnResume, btnRestart, btnExit];
+
+        const updatePauseBgm = () => {
+            let muted = this.registry.get('bgmMuted');
+            let volume = this.registry.get('bgmVolume');
+            pMusicToggleBtn.setText(`🎵 Musik: ${muted ? 'OFF' : 'ON'}`);
+            pMusicToggleBtn.setStyle({ backgroundColor: muted ? '#c62828' : '#2e7d32' });
+            pVolText.setText(`Vol: ${Math.round(volume * 100)}%`);
+            let currentBgm = this.sound.get('bgm');
+            if (currentBgm) {
+                currentBgm.setVolume(muted ? 0 : volume);
+            }
+        };
+        this.updatePauseBgm = updatePauseBgm;
+
+        pMusicToggleBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let muted = !this.registry.get('bgmMuted');
+            this.registry.set('bgmMuted', muted);
+            updatePauseBgm();
+        });
+
+        pVolDownBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let volume = Math.max(0, (this.registry.get('bgmVolume') ?? 0.35) - 0.05);
+            this.registry.set('bgmVolume', volume);
+            updatePauseBgm();
+        });
+
+        pVolUpBtn.on('pointerdown', () => {
+            this.sound.play('click_sfx', { volume: 0.7 });
+            let volume = Math.min(1.0, (this.registry.get('bgmVolume') ?? 0.35) + 0.05);
+            this.registry.set('bgmVolume', volume);
+            updatePauseBgm();
+        });
+
         btnResume.on('pointerdown', () => {
             this.sound.play('click_sfx', { volume: 0.7 });
             this.togglePauseGame();
@@ -458,6 +603,7 @@ class MainScene extends Phaser.Scene {
                 c.anims.stop();
             });
             this.pauseContainer.setVisible(true);
+            if (this.updatePauseBgm) this.updatePauseBgm();
         } else {
             this.physics.world.resume();
             this.customerTimer.paused = false;
