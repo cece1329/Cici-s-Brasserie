@@ -210,7 +210,7 @@ class MainScene extends Phaser.Scene {
         // --- ⚡ FIX UTAMA: SETTING KAMERA ZOOM BIAR KAFE KELIHATAN DEKAT ⚡ ---
         this.cameras.main.setBounds(0, 0, realMapWidth, realMapHeight);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-        this.cameras.main.setZoom(2.3); // Kamera otomatis nge-zoom pixel art biar gemas dan gak kejauhan!
+        this.cameras.main.setZoom(1.3); // Kamera zoom diperkecil supaya gak terlalu dekat
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -220,7 +220,7 @@ class MainScene extends Phaser.Scene {
         this.hudContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(9999);
         
         // Kita hitung kebalikan dari zoom kamera supaya HUD tidak jadi raksasa
-        const z = 2.3;
+        const z = 1.3;
         const uiScale = 1 / z;
         this.hudContainer.setScale(uiScale);
 
