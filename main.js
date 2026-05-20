@@ -1,6 +1,86 @@
-// --- FULL RESTORATION VERSION (FIXED PRELOAD ERROR) ---
-// Fitur: Layout Auto-Fit Full Screen (ENVELOP), Deteksi Dapur Ketat, Sistem Shop, Menu, Animasi, dan Gameplay.
+// --- CICI'S BRASSERIE: GITHUB PAGES UI-FIXED & CLEAN EDITION ---
 
+// ==========================================
+// 1. INTRO SCENE (MAIN MENU SCREEN)
+// ==========================================
+class IntroScene extends Phaser.Scene {
+    constructor() {
+        super('IntroScene');
+    }
+
+    preload() {
+        this.load.image('intro_bg', 'asetgamepjbl/intro.png');
+        this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
+    }
+
+    create() {
+        const { width, height } = this.scale;
+
+        let bg = this.add.image(0, 0, 'intro_bg').setOrigin(0, 0).setDisplaySize(width, height);
+        this.add.rectangle(0, 0, width, height, 0x2d1b18, 0.55).setOrigin(0);
+
+        if (!this.anims.exists('menu_amelia_idle')) {
+            this.anims.create({
+                key: 'menu_amelia_idle',
+                frames: this.anims.generateFrameNumbers('amelia_idle', { start: 18, end: 23 }),
+                frameRate: 6,
+                repeat: -1
+            });
+        }
+
+        let menuPlayer = this.add.sprite(width / 2, height / 2 - 30, 'amelia_idle').setScale(5.5);
+        menuPlayer.play('menu_amelia_idle');
+
+        this.add.text(width / 2, height / 2 - 170, "CICI'S BRASSERIE", {
+            fontSize: '54px', fill: '#ffb74d', fontStyle: 'bold', fontFamily: 'Courier New', stroke: '#3e2723', strokeThickness: 8
+        }).setOrigin(0.5);
+
+        this.add.text(width / 2, height / 2 - 110, "Kelola Kafe Pixel Impianmu ✨", {
+            fontSize: '20px', fill: '#fff3e0', fontStyle: 'italic', fontFamily: 'Courier New'
+        }).setOrigin(0.5);
+
+        // TOMBOL 1: START GAME
+        let startBtn = this.add.text(width / 2, height / 2 + 100, " 🌸 START GAME 🌸 ", {
+            fontSize: '26px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: { x: 25, y: 12 }, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        // TOMBOL 2: HOW TO PLAY
+        let howToBtn = this.add.text(width / 2, height / 2 + 175, " 📋 HOW TO PLAY 📋 ", {
+            fontSize: '22px', fill: '#fff3e0', backgroundColor: '#8d6e63', padding: { x: 20, y: 10 }, fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        startBtn.on('pointerover', () => startBtn.setStyle({ backgroundColor: '#f06292' }));
+        startBtn.on('pointerout', () => startBtn.setStyle({ backgroundColor: '#f48fb1' }));
+        howToBtn.on('pointerover', () => howToBtn.setStyle({ backgroundColor: '#5d4037' }));
+        howToBtn.on('pointerout', () => howToBtn.setStyle({ backgroundColor: '#8d6e63' }));
+
+        startBtn.on('pointerdown', () => this.scene.start('MainScene'));
+
+        // POP-UP TUTORIAL HOW TO PLAY
+        let tutorialGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
+        let tutBg = this.add.rectangle(width / 2, height / 2, 600, 380, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
+        let tutTitle = this.add.text(width / 2, height / 2 - 140, "--- CARA BERMAIN ---", { fontSize: '30px', fontStyle: 'bold', fill: '#ffb74d', fontFamily: 'Courier New' }).setOrigin(0.5);
+        let tutContent = this.add.text(width / 2, height / 2 - 10,
+            "🏃 KONTROL GERAK:\nGunakan tombol W, A, S, D di keyboard untuk\nmenggerakkan Amelia keliling kafe.\n\n" +
+            "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar (X: 465) untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
+            "🛒 UPGRADE KAFE:\nGunakan koinmu di menu SHOP untuk membuka resep menu baru!\n" +
+            "⏸️ PAUSE MENU:\nTekan tombol P, ESC, atau klik tombol PAUSE di navbar.", { fontSize: '15px', fill: '#ffffff', fontFamily: 'Courier New', lineHeight: 1.4 }).setOrigin(0.5);
+        let closeTutBtn = this.add.text(width / 2, height / 2 + 140, " [ CLOSE ] ", { fontSize: '20px', fill: '#ffffff', backgroundColor: '#d32f2f', padding: 8, fontFamily: 'Courier New' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        closeTutBtn.on('pointerover', () => closeTutBtn.setStyle({ backgroundColor: '#b71c1c' }));
+        closeTutBtn.on('pointerout', () => closeTutBtn.setStyle({ backgroundColor: '#d32f2f' }));
+        tutorialGroup.add([tutBg, tutTitle, tutContent, closeTutBtn]);
+
+        howToBtn.on('pointerdown', () => tutorialGroup.setVisible(true));
+        closeTutBtn.on('pointerdown', () => tutorialGroup.setVisible(false));
+
+        this.add.text(width / 2, height - 25, "© 2026 Kafe Cici Project. All Rights Reserved.", { fontSize: '12px', fill: '#b0bec5', fontFamily: 'Arial' }).setOrigin(0.5);
+    }
+}
+
+// ==========================================
+// 2. MAIN SCENE (GAMEPLAY UTAMA)
+// ==========================================
 class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
@@ -12,19 +92,20 @@ class MainScene extends Phaser.Scene {
         this.load.on('progress', (v) => loadingText.setText(`Mempersiapkan Kafe Cici... ${Math.floor(v * 100)}%`));
         this.load.on('complete', () => loadingText.destroy());
 
-        // Assets
+        // Assets Barista Amelia
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('amelia_run', 'asetgamepjbl/barista/Amelia_run_16x16.png', { frameWidth: 16, frameHeight: 32 });
-        
+
+        // Assets Pelanggan
         ['adam', 'alex', 'bob'].forEach(name => {
             const path = `asetgamepjbl/pelanggan/${name.charAt(0).toUpperCase() + name.slice(1)}/`;
             const base = name.charAt(0).toUpperCase() + name.slice(1);
-            // FIX: Tanda petik di akhir fungsi .png' sudah diperbaiki menjadi .png)
             this.load.spritesheet(`${name}_idle`, `${path}${base}_idle_anim_16x16.png`, { frameWidth: 16, frameHeight: 32 });
             this.load.spritesheet(`${name}_run`, `${path}${base}_run_16x16.png`, { frameWidth: 16, frameHeight: 32 });
             this.load.spritesheet(`${name}_sit`, `${path}${base}_sit_16x16.png`, { frameWidth: 32, frameHeight: 32 });
         });
-        
+
+        // Lain-lain
         this.load.image('bubble_pesan', 'asetgamepjbl/bubblechatpesan.png');
         this.load.image('proses', 'asetgamepjbl/proses.png');
         this.load.image('indoor', 'asetgamepjbl/indoor.png');
@@ -38,12 +119,21 @@ class MainScene extends Phaser.Scene {
     }
 
     create() {
+        // PERBAIKAN UTAMA: Mengunci ukuran asli layar monitor browser di GitHub Pages
+        const width = this.scale.width;
+        const height = this.scale.height;
+        this.isGamePaused = false;
+
         // --- ANIMATIONS ---
         this.anims.create({ key: 'run_right', frames: this.anims.generateFrameNumbers('amelia_run', { start: 0, end: 5 }), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'run_up', frames: this.anims.generateFrameNumbers('amelia_run', { start: 6, end: 11 }), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'run_left', frames: this.anims.generateFrameNumbers('amelia_run', { start: 12, end: 17 }), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'run_down', frames: this.anims.generateFrameNumbers('amelia_run', { start: 18, end: 23 }), frameRate: 10, repeat: -1 });
-        this.anims.create({ key: 'idle_down', frames: this.anims.generateFrameNumbers('amelia_idle', { start: 18, end: 23 }), frameRate: 6, repeat: -1 });
+
+        if (!this.anims.exists('idle_down')) {
+            this.anims.create({ key: 'idle_down', frames: this.anims.generateFrameNumbers('amelia_idle', { start: 18, end: 23 }), frameRate: 6, repeat: -1 });
+        }
+
         ['adam', 'alex', 'bob'].forEach(name => {
             this.anims.create({ key: `${name}_run_up`, frames: this.anims.generateFrameNumbers(`${name}_run`, { start: 6, end: 11 }), frameRate: 10, repeat: -1 });
             this.anims.create({ key: `${name}_run_down`, frames: this.anims.generateFrameNumbers(`${name}_run`, { start: 18, end: 23 }), frameRate: 10, repeat: -1 });
@@ -53,9 +143,7 @@ class MainScene extends Phaser.Scene {
         this.anims.create({ key: 'shine_anim', frames: this.anims.generateFrameNumbers('shine'), frameRate: 8, repeat: -1 });
 
         // --- MAP & PHYSICS ---
-        const { width, height } = this.scale;
         const MAP_W = 1402; const MAP_H = 1122;
-        
         this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(MAP_W, MAP_H);
         this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
 
@@ -68,8 +156,12 @@ class MainScene extends Phaser.Scene {
         addWall(0, 0, MAP_W, 20); addWall(0, MAP_H - 20, MAP_W, 20); addWall(0, 0, 20, MAP_H); addWall(MAP_W - 20, 0, 20, MAP_H);
         addWall(100, 380, 550, 80); addWall(648, 88, 40, 300); addWall(100, 0, 550, 260);
 
-        // --- STATS ---
-        this.coins = 0; this.level = 1; this.exp = 0; this.expToNextLevel = 50;
+        // --- STATUS GAME ---
+        this.coins = 750;
+        this.level = 1;
+        this.exp = 0;
+        this.expToNextLevel = 50;
+
         this.baseSpeed = 250;
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
@@ -83,7 +175,7 @@ class MainScene extends Phaser.Scene {
             { x: 775, y: 700, isOccupied: false, minLevel: 4 }
         ];
 
-        // --- PLAYER ---
+        // --- PLAYER (AMELIA) ---
         this.player = this.physics.add.sprite(300, 320, 'amelia_idle').setScale(4.5);
         this.player.setCollideWorldBounds(true);
         this.player.body.setSize(8, 6).setOffset(4, 26);
@@ -95,89 +187,137 @@ class MainScene extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
+        // Input Keyboard
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
+        this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.pauseKeyEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
-        // --- UI HUD ---
-        this.add.rectangle(0, 0, width, 70, 0x3e2723, 0.9).setOrigin(0).setScrollFactor(0).setDepth(1000);
-        this.coinText = this.add.text(20, 10, `💰 Coins: 0`, { fontSize: '22px', fill: '#ffd54f', fontStyle: 'bold' }).setScrollFactor(0).setDepth(1001);
-        this.levelText = this.add.text(width - 150, 10, `⭐ Level: 1`, { fontSize: '22px', fill: '#fff', fontStyle: 'bold' }).setScrollFactor(0).setDepth(1001);
-        this.expBar = this.add.rectangle(width - 150, 45, 0, 10, 0x4caf50).setOrigin(0).setScrollFactor(0).setDepth(1002);
+        // --- NAVBAR HUD SYSTEM ---
+        this.hudContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(9999);
+        this.navBg = this.add.rectangle(0, 0, width, 70, 0x3e2723, 0.9).setOrigin(0).setScrollFactor(0);
+        this.coinText = this.add.text(20, 20, `💰 Coins: ${this.coins}`, { fontSize: '22px', fill: '#ffd54f', fontStyle: 'bold' }).setScrollFactor(0);
+        this.levelText = this.add.text(width - 170, 20, `⭐ Level: ${this.level}`, { fontSize: '22px', fill: '#fff', fontStyle: 'bold' }).setScrollFactor(0);
+        this.expBar = this.add.rectangle(width - 170, 50, 0, 10, 0x4caf50).setOrigin(0).setScrollFactor(0);
 
-        this.shopBtn = this.add.text(width/2 - 80, 35, "🛒 SHOP", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(1001);
-        this.menuBtn = this.add.text(width/2 + 80, 35, "📋 MENU", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(1001);
+        this.shopBtn = this.add.text(width / 2 - 130, 35, "🛒 SHOP", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        this.pauseBtn = this.add.text(width / 2, 35, "⏸ PAUSE", { fontSize: '18px', backgroundColor: '#d84315', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        this.menuBtn = this.add.text(width / 2 + 130, 35, "📋 MENU", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
 
-        // --- SHOP & MENU PANELS ---
+        this.hudContainer.add([this.navBg, this.coinText, this.levelText, this.expBar, this.shopBtn, this.pauseBtn, this.menuBtn]);
+        this.pauseBtn.on('pointerdown', () => this.togglePauseGame());
+
+        // --- SHOP & MENU LOGIC ---
         this.shopElements = [];
-        const createShop = () => {
-            const shopBg = this.add.rectangle(width / 2, height / 2, 450, 450, 0x3e2723).setStrokeStyle(4, 0x795548).setScrollFactor(0).setDepth(2000).setVisible(false);
-            const shopTitle = this.add.text(width / 2, height / 2 - 190, "UPGRADE MENU", { fontSize: '32px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
-            const addItem = (foodKey, cost, reqLevel, yOffset) => {
-                const bg = this.add.rectangle(width / 2, height / 2 + yOffset, 400, 70, 0x4e342e).setInteractive().setScrollFactor(0).setDepth(2001).setVisible(false);
-                const icon = this.add.image(width / 2 - 160, height / 2 + yOffset, foodKey).setScale(2).setScrollFactor(0).setDepth(2002).setVisible(false);
-                const name = foodKey.split('_')[1].toUpperCase();
-                const text = this.add.text(width / 2 - 120, height / 2 + yOffset, `Unlock ${name} (${cost} Coins)\n[REQ LEVEL ${reqLevel}]`, { fontSize: '14px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002).setVisible(false);
-                this.shopElements.push(bg, icon, text);
-                bg.on('pointerdown', () => {
-                    if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
-                        this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
-                        text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
-                    }
-                });
-            };
-            addItem('food_burger', 30, 2, -100);
-            addItem('food_croissant', 60, 3, -20);
-            addItem('food_cake', 100, 5, 60);
-            const closeBtn = this.add.text(width/2, height/2 + 180, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(2002).setVisible(false);
-            this.shopElements.push(shopBg, shopTitle, closeBtn);
-            closeBtn.on('pointerdown', () => this.shopElements.forEach(el => el.setVisible(false)));
+        const shopBg = this.add.rectangle(width / 2, height / 2, 450, 420, 0x3e2723).setStrokeStyle(4, 0x795548).setScrollFactor(0).setDepth(2000).setVisible(false);
+        const shopTitle = this.add.text(width / 2, height / 2 - 170, "UPGRADE SHOP", { fontSize: '28px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
+        this.shopElements.push(shopBg, shopTitle);
+
+        const addItem = (foodKey, cost, reqLevel, yOffset) => {
+            const bg = this.add.rectangle(width / 2, height / 2 + yOffset, 400, 55, 0x4e342e).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2001).setVisible(false);
+            const icon = this.add.image(width / 2 - 160, height / 2 + yOffset, foodKey).setScale(1.8).setScrollFactor(0).setDepth(2002).setVisible(false);
+            const name = foodKey.split('_')[1].toUpperCase();
+            const text = this.add.text(width / 2 - 120, height / 2 + yOffset, `Unlock ${name} (${cost} Coins) [REQ LV ${reqLevel}]`, { fontSize: '13px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002).setVisible(false);
+            this.shopElements.push(bg, icon, text);
+            bg.on('pointerdown', () => {
+                if (this.isGamePaused) return;
+                if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
+                    this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
+                    text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
+                }
+            });
         };
-        createShop();
+        addItem('food_burger', 30, 2, -100); addItem('food_croissant', 60, 3, -40); addItem('food_cake', 100, 5, 20);
+
+        const closeBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2002).setVisible(false);
+        this.shopElements.push(closeBtn);
+        closeBtn.on('pointerdown', () => this.shopElements.forEach(el => el.setVisible(false)));
+        this.shopBtn.on('pointerdown', () => { if (this.isGamePaused) return; this.menuElements.forEach(el => el.setVisible(false)); this.shopElements.forEach(el => el.setVisible(true)); });
 
         this.menuElements = [];
-        const createMenuPanel = () => {
-            const menuBg = this.add.rectangle(width / 2, height / 2, 500, 400, 0x2d1b18).setStrokeStyle(4, 0x8d6e63).setScrollFactor(0).setDepth(2000).setVisible(false);
-            const menuTitle = this.add.text(width / 2, height / 2 - 160, "OUR MENU", { fontSize: '32px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
-            const closeMenuBtn = this.add.text(width / 2, height / 2 + 160, " [ BACK ] ", { fontSize: '24px', backgroundColor: '#5d4037', padding: 8 }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(2001).setVisible(false);
-            this.menuElements = [menuBg, menuTitle, closeMenuBtn];
-            this.menuBtn.on('pointerdown', () => {
-                this.shopElements.forEach(el => el.setVisible(false));
-                this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
-                this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
-                this.menuElements.forEach(el => el.setVisible(true));
-                this.foodOptions.forEach((food, index) => {
-                    const y = height / 2 - 80 + (index * 60);
-                    const icon = this.add.image(width / 2 - 180, y, food).setScale(2).setScrollFactor(0).setDepth(2002);
-                    const text = this.add.text(width / 2 - 140, y, `${food.split('_')[1].toUpperCase()} - 💰${this.foodPrices[food]}`, { fontSize: '20px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002);
-                    icon.isFoodItem = true; text.isFoodItem = true; this.menuElements.push(icon, text);
-                });
+        const menuBg = this.add.rectangle(width / 2, height / 2, 500, 400, 0x2d1b18).setStrokeStyle(4, 0x8d6e63).setScrollFactor(0).setDepth(2000).setVisible(false);
+        const menuTitle = this.add.text(width / 2, height / 2 - 160, "OUR MENU", { fontSize: '32px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
+        const closeMenuBtn = this.add.text(width / 2, height / 2 + 160, " [ BACK ] ", { fontSize: '24px', backgroundColor: '#5d4037', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2001).setVisible(false);
+        this.menuElements = [menuBg, menuTitle, closeMenuBtn];
+
+        this.menuBtn.on('pointerdown', () => {
+            if (this.isGamePaused) return;
+            this.shopElements.forEach(el => el.setVisible(false));
+            this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
+            this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
+            this.menuElements.forEach(el => el.setVisible(true));
+            this.foodOptions.forEach((food, index) => {
+                const y = height / 2 - 80 + (index * 60);
+                const icon = this.add.image(width / 2 - 180, y, food).setScale(2).setScrollFactor(0).setDepth(2002);
+                const text = this.add.text(width / 2 - 140, y, `${food.split('_')[1].toUpperCase()} - 💰${this.foodPrices[food]}`, { fontSize: '20px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002);
+                icon.isFoodItem = true; text.isFoodItem = true; this.menuElements.push(icon, text);
             });
-            closeMenuBtn.on('pointerdown', () => this.menuElements.forEach(el => el.setVisible(false)));
-        };
-        createMenuPanel();
+        });
+        closeMenuBtn.on('pointerdown', () => this.menuElements.forEach(el => el.setVisible(false)));
 
-        this.shopBtn.on('pointerdown', () => { this.menuElements.forEach(el => el.setVisible(false)); this.shopElements.forEach(el => el.setVisible(true)); });
+        // --- POP-UP OVERLAY PAUSE ---
+        this.pauseElements = [];
+        let pBg = this.add.rectangle(width / 2, height / 2, 450, 380, 0x4e342e, 0.95).setStrokeStyle(5, 0xf48fb1).setScrollFactor(0).setDepth(10000);
+        let pTitle = this.add.text(width / 2, height / 2 - 120, "KAFE DI-ISTIRAHATKAN", { fontSize: '28px', fontStyle: 'bold', fill: '#fff3e0', fontFamily: 'Courier New' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001);
+        let btnResume = this.add.text(width / 2, height / 2 - 25, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        let btnRestart = this.add.text(width / 2, height / 2 + 40, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        let btnExit = this.add.text(width / 2, height / 2 + 105, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
+        this.pauseElements.forEach(el => el.setVisible(false));
+        btnResume.on('pointerdown', () => this.togglePauseGame());
+        btnRestart.on('pointerdown', () => this.scene.restart());
+        btnExit.on('pointerdown', () => this.scene.start('IntroScene'));
 
-        // --- GAMEPLAY ELEMENTS ---
+        // --- GAMEPLAY ELEMENTS & GROUPS ---
         this.customerGroup = this.physics.add.group();
-        this.cookBtn = this.add.text(width / 2, height - 60, "🍳 MASAK 🍳", { fontSize: '28px', backgroundColor: '#8d6e63', padding: 15 }).setOrigin(0.5).setInteractive().setVisible(false).setDepth(500).setScrollFactor(0);
+        this.moneyGroup = this.physics.add.group();
+
+        this.cookBtn = this.add.text(width / 2, height - 60, "🍳 MASAK 🍳", { fontSize: '28px', backgroundColor: '#8d6e63', padding: 15 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(500).setScrollFactor(0);
         this.prosesImg = this.add.image(width / 2, height - 60, 'proses').setScale(0.6).setVisible(false).setDepth(500).setScrollFactor(0);
+
         this.heldContainer = this.add.container(0, 0).setVisible(false).setDepth(150);
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
-        
-        this.cookBtn.on('pointerdown', () => this.startCooking());
-        this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
-        this.spawnCustomer();
-        
-        this.moneyGroup = this.physics.add.group();
-        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => {
-            this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy();
-        }, null, this);
 
-        this.kitchenZone = { x: 670, y: 460 };
-        this.doorPos = { x: 690, y: 1070 };
+        this.cookBtn.on('pointerdown', () => this.startCooking());
+        this.customerTimer = this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
+        this.spawnCustomer();
+
+        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
+
+        // Tempat Saji di Meja Bar
+        this.isFoodOnCounter = false;
+        this.counterFoodKey = '';
+
+        this.counterFoodSprite = this.add.container(465, 355).setVisible(false).setDepth(80);
+        this.counterPlateImg = this.add.image(0, 5, 'plate').setScale(2.5);
+        this.counterFoodImg = this.add.image(0, -5, 'food_coffee').setScale(1.2);
+        this.counterFoodSprite.add([this.counterPlateImg, this.counterFoodImg]);
+
+        this.updateUI();
+    }
+
+    togglePauseGame() {
+        this.isGamePaused = !this.isGamePaused;
+        if (this.isGamePaused) {
+            this.player.setVelocity(0); this.player.anims.stop();
+            this.physics.world.pause();
+            this.customerTimer.paused = true;
+            this.customerGroup.getChildren().forEach(c => { c.setVelocity(0); c.anims.stop(); });
+            this.pauseElements.forEach(el => el.setVisible(true));
+        } else {
+            this.physics.world.resume();
+            this.customerTimer.paused = false;
+            this.pauseElements.forEach(el => el.setVisible(false));
+        }
     }
 
     update() {
+        if (Phaser.Input.Keyboard.JustDown(this.pauseKeyP) || Phaser.Input.Keyboard.JustDown(this.pauseKeyEsc)) {
+            this.togglePauseGame();
+        }
+
+        if (this.isGamePaused) return;
+
+        // Gerakan Utama Amelia WASD
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
         else if (this.cursors.D.isDown) { this.player.setVelocityX(this.baseSpeed); direction = 'right'; isMoving = true; }
@@ -186,14 +326,30 @@ class MainScene extends Phaser.Scene {
         if (this.player.body.velocity.x !== 0 && this.player.body.velocity.y !== 0) this.player.body.velocity.normalize().scale(this.baseSpeed);
         if (isMoving) this.player.anims.play(`run_${direction}`, true); else this.player.anims.play('idle_down', true);
 
-        if (this.hasFood) this.heldContainer.setPosition(this.player.x, this.player.y - 40);
+        if (this.hasFood) this.heldContainer.setPosition(this.player.x, this.player.y - 50);
         this.player.setDepth(this.player.y);
-        
+
+        // Munculkan Tombol Masak Hanya di Area Dapur Atas & Ketika Ada Antrean Pesanan
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
         const isInKitchen = (this.player.x >= 100 && this.player.x <= 650 && this.player.y < 380);
-        
+
+        // Memastikan tombol masak mengikuti skala window browser ter-update
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
+        // Ambil Makanan dari Meja Saji Bar
+        if (this.isFoodOnCounter && !this.hasFood) {
+            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, 465, 355);
+            if (distanceToCounter < 110) {
+                this.isFoodOnCounter = false;
+                this.counterFoodSprite.setVisible(false);
+                this.hasFood = true;
+                this.heldFoodKey = this.counterFoodKey;
+                this.heldFoodImg.setTexture(this.heldFoodKey);
+                this.heldContainer.setVisible(true);
+            }
+        }
+
+        // Siklus Logika Pelanggan Datang & Dilayani Amelia
         this.customerGroup.getChildren().forEach(c => {
             c.setDepth(c.y);
             if (c.state === 'ARRIVING') {
@@ -233,6 +389,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnCustomer() {
+        if (this.isGamePaused) return;
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
         freeChair.isOccupied = true;
@@ -241,24 +398,34 @@ class MainScene extends Phaser.Scene {
         customer.customerName = name; customer.targetChair = freeChair; customer.state = 'ARRIVING';
         customer.tx = freeChair.x; customer.ty = freeChair.y;
         customer.bubble = this.add.container(0, 0).setVisible(false).setDepth(200);
-        const bg = this.add.image(0, 0, 'bubble_pesan').setScale(0.3).setInteractive();
+        const bg = this.add.image(0, 0, 'bubble_pesan').setScale(0.3).setInteractive({ useHandCursor: true });
         customer.orderedFood = Phaser.Math.RND.pick(this.foodOptions);
         customer.bubble.add([bg, this.add.image(0, -12, customer.orderedFood).setScale(1.5)]);
-        bg.on('pointerdown', () => { if (customer.state === 'ORDERING') { customer.bubble.setVisible(false); customer.state = 'NEEDS_COOKING'; } });
+        bg.on('pointerdown', () => {
+            if (this.isGamePaused) return;
+            if (customer.state === 'ORDERING') { customer.bubble.setVisible(false); customer.state = 'NEEDS_COOKING'; }
+        });
         this.customerGroup.add(customer);
         customer.play(`${name}_run_up`);
         this.physics.moveTo(customer, customer.tx, customer.ty, 150);
     }
 
     startCooking() {
+        if (this.isGamePaused) return;
         const target = this.customerGroup.getChildren().find(c => c.state === 'NEEDS_COOKING');
         if (target && !this.hasFood && !this.isCooking) {
             this.isCooking = true;
             this.cookBtn.setVisible(false); this.prosesImg.setVisible(true);
             this.time.delayedCall(3000, () => {
                 this.isCooking = false;
-                this.prosesImg.setVisible(false); this.hasFood = true; this.heldFoodKey = target.orderedFood;
-                this.heldFoodImg.setTexture(this.heldFoodKey); this.heldContainer.setVisible(true);
+                this.prosesImg.setVisible(false);
+
+                // Makanan ditaruh langsung ke Meja Bar Saji
+                this.isFoodOnCounter = true;
+                this.counterFoodKey = target.orderedFood;
+                this.counterFoodImg.setTexture(this.counterFoodKey);
+                this.counterFoodSprite.setVisible(true);
+
                 target.state = 'WAITING';
             });
         }
@@ -273,18 +440,20 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-// Konfigurasi Scale Mode ENVELOP untuk Full Screen Sempurna
+// ==========================================
+// 3. CONFIGURATION POOL (MENGGUNAKAN MODE RESIZE)
+// ==========================================
 const config = {
     type: Phaser.AUTO,
-    scale: { 
-        mode: Phaser.Scale.ENVELOP, 
+    scale: {
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        parent: 'game-container', 
-        width: 1280, 
-        height: 720 
+        parent: 'game-container',
+        width: '100%',
+        height: '100%'
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
-    scene: [MainScene]
+    scene: [IntroScene, MainScene]
 };
 new Phaser.Game(config);
