@@ -294,16 +294,16 @@ class MainScene extends Phaser.Scene {
         this.customerGroup = this.physics.add.group();
         this.moneyGroup = this.physics.add.group();
 
-        // --- FIX POSISI TOMBOL MASAK & PROSES LOADING (MENGIKUTI KOORDINAT MAP INTERNAL) ---
-        this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.28, "🍳 MASAK 🍳", {
-            fontSize: '24px',
+        // --- FIX TOMBOL MASAK & PROSES (DIGESER LEBIH KE ATAS BIAR KELIHATAN PAS ZOOM) ---
+        this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.16, "🍳 MASAK 🍳", {
+            fontSize: '22px',
             backgroundColor: '#8d6e63',
-            padding: 12,
+            padding: 10,
             fontFamily: 'Courier New',
             fontStyle: 'bold'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(500);
 
-        this.prosesImg = this.add.image(realMapWidth * 0.25, realMapHeight * 0.28, 'proses').setScale(0.6).setVisible(false).setDepth(500);
+        this.prosesImg = this.add.image(realMapWidth * 0.25, realMapHeight * 0.16, 'proses').setScale(0.6).setVisible(false).setDepth(500);
 
         this.heldContainer = this.add.container(0, 0).setVisible(false).setDepth(150);
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
