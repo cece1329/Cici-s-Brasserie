@@ -13,8 +13,8 @@ class IntroScene extends Phaser.Scene {
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
 
         // --- AUDIO SYSTEM LOAD ---
-        // BGM: Aqua Kitty Kitty Rock (sangat lucu & retro)
-        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/aquakitty-kittyrock.m4a');
+        // BGM: Soundtrack Utama Kafe Cici (Lokal)
+        this.load.audio('bgm', 'asetgamepjbl/main_soundtrack.mp3');
         
         // Efek Suara Lucu & Cringg Koin
         this.load.audio('click_sfx', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/menu_select.mp3');
