@@ -13,7 +13,13 @@ class IntroScene extends Phaser.Scene {
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
 
         // --- AUDIO SYSTEM LOAD ---
-        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/bodenstaendig_2000_in_rock_4bit.mp3');
+        // BGM: Aqua Kitty Kitty Rock (sangat lucu & retro)
+        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/aquakitty-kittyrock.m4a');
+        
+        // Efek Suara Lucu & Cringg Koin
+        this.load.audio('click_sfx', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/menu_select.mp3');
+        this.load.audio('coin_cring', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/p-ping.mp3');
+
         this.load.audioSprite('sfx', 
             'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/fx_mixdown.json',
             [
@@ -76,7 +82,7 @@ class IntroScene extends Phaser.Scene {
         howToBtn.on('pointerout', () => howToBtn.setStyle({ backgroundColor: '#8d6e63' }));
 
         startBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.scene.start('MainScene');
         });
 
@@ -104,11 +110,11 @@ class IntroScene extends Phaser.Scene {
         tutorialGroup.add([tutBg, tutTitle, tutContent, closeTutBtn]);
 
         howToBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             tutorialGroup.setVisible(true);
         });
         closeTutBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             tutorialGroup.setVisible(false);
         });
 
@@ -305,7 +311,7 @@ class MainScene extends Phaser.Scene {
 
         this.hudContainer.add([this.navBg, this.coinText, this.levelText, this.expBar, this.shopBtn, this.pauseBtn, this.menuBtn]);
         this.pauseBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.togglePauseGame();
         });
 
@@ -329,9 +335,9 @@ class MainScene extends Phaser.Scene {
                 if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
                     this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
                     text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
-                    this.sound.playAudioSprite('sfx', 'ping'); // Play unlock sound
+                    this.sound.play('coin_cring', { volume: 0.8 }); // Play coin sound on unlock!
                 } else {
-                    this.sound.playAudioSprite('sfx', 'numkey'); // Fail sound / standard click
+                    this.sound.play('click_sfx', { volume: 0.7 }); // Fail/select click sound
                 }
             });
         };
@@ -341,12 +347,12 @@ class MainScene extends Phaser.Scene {
         this.shopContainer.add(closeBtn);
         this.shopElements.push(closeBtn);
         closeBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.shopContainer.setVisible(false);
         });
         this.shopBtn.on('pointerdown', () => {
             if (this.isGamePaused) return;
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.menuContainer.setVisible(false);
             this.shopContainer.setVisible(true);
         });
@@ -361,7 +367,7 @@ class MainScene extends Phaser.Scene {
 
         this.menuBtn.on('pointerdown', () => {
             if (this.isGamePaused) return;
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.shopContainer.setVisible(false);
             this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
             this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
@@ -376,7 +382,7 @@ class MainScene extends Phaser.Scene {
             });
         });
         closeMenuBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.menuContainer.setVisible(false);
         });
 
@@ -392,15 +398,15 @@ class MainScene extends Phaser.Scene {
         this.pauseContainer.add([pBg, pTitle, btnResume, btnRestart, btnExit]);
         this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
         btnResume.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.togglePauseGame();
         });
         btnRestart.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.scene.restart();
         });
         btnExit.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.scene.start('IntroScene');
         });
 
@@ -424,7 +430,7 @@ class MainScene extends Phaser.Scene {
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
 
         this.cookBtn.on('pointerdown', () => {
-            this.sound.playAudioSprite('sfx', 'numkey');
+            this.sound.play('click_sfx', { volume: 0.7 });
             this.startCooking();
         });
         this.customerTimer = this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
@@ -536,7 +542,7 @@ class MainScene extends Phaser.Scene {
             let dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y);
             if (dist < 180) { // Jarak ambil otomatis
                 m.isCollected = true;
-                this.sound.playAudioSprite('sfx', 'escape', { volume: 0.4 });
+                this.sound.play('click_sfx', { volume: 0.5 }); // Pop sound when coin starts flying!
                 let val = m.coinValue;
                 let startX = m.x; let startY = m.y;
                 m.destroy(); // Hancurkan koin fisik di meja
@@ -560,7 +566,7 @@ class MainScene extends Phaser.Scene {
                     },
                     onComplete: () => {
                         flyingCoin.destroy();
-                        this.sound.playAudioSprite('sfx', 'ping', { volume: 0.6 });
+                        this.sound.play('coin_cring', { volume: 0.8 }); // Cute metallic cringg sound!
                         this.coins += val;
                         this.gainExp(20);
                         this.updateUI();
@@ -613,7 +619,7 @@ class MainScene extends Phaser.Scene {
         bg.on('pointerdown', () => {
             if (this.isGamePaused) return;
             if (customer.state === 'ORDERING') {
-                this.sound.playAudioSprite('sfx', 'numkey');
+                this.sound.play('click_sfx', { volume: 0.7 });
                 customer.bubble.setVisible(false);
                 customer.state = 'NEEDS_COOKING';
             }
