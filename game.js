@@ -178,13 +178,10 @@ class MainScene extends Phaser.Scene {
         addWall(realMapWidth - 20, 0, 20, realMapHeight);
 
         // 1. KITCHEN BACK (Lemari, Kompor, Wastafel) -> Diperbesar sampai bawah meja kompor
-        addWall(realMapWidth * 0.03, 0, realMapWidth * 0.45, realMapHeight * 0.28);
+        addWall(realMapWidth * 0.03, 0, realMapWidth * 0.45, realMapHeight * 0.26);
         
         // 2. KITCHEN FRONT (Meja merah + Bar Stools) -> Diperlebar ke bawah menutupi dudukan kursi bar
         addWall(realMapWidth * 0.03, realMapHeight * 0.33, realMapWidth * 0.45, realMapHeight * 0.12);
-        
-        // 3. KITCHEN SIDE (Penyambung)
-        addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
 
         // --- COLLISION OBYEK STATIS ---
         // Jukebox / Mesin Musik di tengah atas
