@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: THE PERFECT DYNAMIC & FIXED UI EDITION ---
+// --- CICI'S BRASSERIE: THE PERFECT DYNAMIC & BUG-FREE EDITION ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -17,6 +17,7 @@ class IntroScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
+        // Trik anti-gepeng untuk background Intro
         let bg = this.add.image(width / 2, height / 2, 'intro_bg').setOrigin(0.5);
         let scaleX = width / bg.width;
         let scaleY = height / bg.height;
@@ -85,6 +86,8 @@ class IntroScene extends Phaser.Scene {
 
         howToBtn.on('pointerdown', () => tutorialGroup.setVisible(true));
         closeTutBtn.on('pointerdown', () => tutorialGroup.setVisible(false));
+
+        this.add.text(width / 2, height - 25, "© 2026 Kafe Cici Project. All Rights Reserved.", { fontSize: '12px', fill: '#b0bec5', fontFamily: 'Arial' }).setOrigin(0.5);
     }
 }
 
@@ -131,9 +134,6 @@ class MainScene extends Phaser.Scene {
         const height = this.scale.height;
         this.isGamePaused = false;
 
-        // Panggil UIScene agar navbar nempel secara terpisah di atas (Anti-Kena Efek Zoom)
-        this.scene.launch('UIScene', { mainScene: this });
-
         // --- ANIMATIONS ---
         this.anims.create({ key: 'run_right', frames: this.anims.generateFrameNumbers('amelia_run', { start: 0, end: 5 }), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'run_up', frames: this.anims.generateFrameNumbers('amelia_run', { start: 6, end: 11 }), frameRate: 10, repeat: -1 });
@@ -152,75 +152,158 @@ class MainScene extends Phaser.Scene {
         this.anims.create({ key: 'coin_anim', frames: this.anims.generateFrameNumbers('coin'), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'shine_anim', frames: this.anims.generateFrameNumbers('shine'), frameRate: 8, repeat: -1 });
 
-        // --- MAP & PHYSICS SETUP ---
+        // --- MAP & PHYSICS (ANTI-GEPENG FIX) ---
         this.mapBg = this.add.image(width / 2, height / 2, 'indoor').setOrigin(0.5);
+
         let sX = width / this.mapBg.width;
         let sY = height / this.mapBg.height;
         let perfectScale = Math.max(sX, sY);
         this.mapBg.setScale(perfectScale);
 
-        this.realMapWidth = this.mapBg.width * perfectScale;
-        this.realMapHeight = this.mapBg.height * perfectScale;
-        this.mapBg.setOrigin(0, 0).setPosition((width - this.realMapWidth) / 2, (height - this.realMapHeight) / 2);
+        // Menghitung dimensi map real setelah di-scale
+        const realMapWidth = this.mapBg.width * perfectScale;
+        const realMapHeight = this.mapBg.height * perfectScale;
 
-        this.physics.world.setBounds(this.mapBg.x, this.mapBg.y, this.realMapWidth, this.realMapHeight);
+        this.physics.world.setBounds(0, 0, realMapWidth, realMapHeight);
 
-        // --- STATIC WALL GENERATOR ---
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
             const r = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0xff0000, 0);
             this.physics.add.existing(r, true);
             this.walls.add(r);
         };
-        addWall(this.mapBg.x, this.mapBg.y, this.realMapWidth, 20);
-        addWall(this.mapBg.x, this.mapBg.y + this.realMapHeight - 20, this.realMapWidth, 20);
-        addWall(this.mapBg.x, this.mapBg.y, 20, this.realMapHeight);
-        addWall(this.mapBg.x + this.realMapWidth - 20, this.mapBg.y, 20, this.realMapHeight);
+        addWall(0, 0, realMapWidth, 20);
+        addWall(0, realMapHeight - 20, realMapWidth, 20);
+        addWall(0, 0, 20, realMapHeight);
+        addWall(realMapWidth - 20, 0, 20, realMapHeight);
 
-        addWall(this.mapBg.x + this.realMapWidth * 0.07, this.mapBg.y + this.realMapHeight * 0.33, this.realMapWidth * 0.4, this.realMapHeight * 0.07);
-        addWall(this.mapBg.x + this.realMapWidth * 0.46, this.mapBg.y + this.realMapHeight * 0.07, 40, this.realMapHeight * 0.26);
-        addWall(this.mapBg.x + this.realMapWidth * 0.07, this.mapBg.y, this.realMapWidth * 0.4, this.realMapHeight * 0.23);
+        addWall(realMapWidth * 0.07, realMapHeight * 0.33, realMapWidth * 0.4, realMapHeight * 0.07);
+        addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
+        addWall(realMapWidth * 0.07, 0, realMapWidth * 0.4, realMapHeight * 0.23);
 
-        // --- GAME SYSTEM STATUS ---
+        // --- STATUS GAME ---
         this.coins = 0;
         this.level = 1;
         this.exp = 0;
         this.expToNextLevel = 50;
-        this.baseSpeed = 340;
+        this.baseSpeed = 250;
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
         this.allChairs = [
-            { x: this.mapBg.x + this.realMapWidth * 0.08, y: this.mapBg.y + this.realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: this.mapBg.x + this.realMapWidth * 0.23, y: this.mapBg.y + this.realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: this.mapBg.x + this.realMapWidth * 0.25, y: this.mapBg.y + this.realMapHeight * 0.66, isOccupied: false, minLevel: 2 },
-            { x: this.mapBg.x + this.realMapWidth * 0.15, y: this.mapBg.y + this.realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
-            { x: this.mapBg.x + this.realMapWidth * 0.55, y: this.mapBg.y + this.realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
+            { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
+            { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
+            { x: realMapWidth * 0.25, y: realMapHeight * 0.66, isOccupied: false, minLevel: 2 },
+            { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
+            { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
         ];
 
         // --- PLAYER (AMELIA) ---
-        this.player = this.physics.add.sprite(this.mapBg.x + this.realMapWidth * 0.21, this.mapBg.y + this.realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
+        this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
         this.player.setCollideWorldBounds(true);
         this.player.body.setSize(8, 6).setOffset(4, 26);
         this.player.setDepth(100);
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- SETTING AREA KAMERA UTK MAIN GAME SCENE ---
-        this.cameras.main.setBounds(this.mapBg.x, this.mapBg.y, this.realMapWidth, this.realMapHeight);
-        this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
-        this.cameras.main.setZoom(1.35); // 🌸 SKALA ZOOM YANG PAS: Map kelihatan dekat, nyaman di mata & UI tidak terlempar rusak!
+        // --- SETTING KAMERA UTK FOLLOW AMELIA ---
+        this.cameras.main.setBounds(0, 0, realMapWidth, realMapHeight);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.pauseKeyEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
+        // --- NAVBAR HUD SYSTEM ---
+        this.hudContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(9999);
+        this.navBg = this.add.rectangle(0, 0, width, 70, 0x3e2723, 0.9).setOrigin(0).setScrollFactor(0);
+        this.coinText = this.add.text(20, 20, `💰 Coins: ${this.coins}`, { fontSize: '22px', fill: '#ffd54f', fontStyle: 'bold' }).setScrollFactor(0);
+        this.levelText = this.add.text(width - 170, 20, `⭐ Level: ${this.level}`, { fontSize: '22px', fill: '#fff', fontStyle: 'bold' }).setScrollFactor(0);
+        this.expBar = this.add.rectangle(width - 170, 50, 0, 10, 0x4caf50).setOrigin(0).setScrollFactor(0);
+
+        this.shopBtn = this.add.text(width / 2 - 130, 35, "🛒 SHOP", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        this.pauseBtn = this.add.text(width / 2, 35, "⏸ PAUSE", { fontSize: '18px', backgroundColor: '#d84315', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        this.menuBtn = this.add.text(width / 2 + 130, 35, "📋 MENU", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
+
+        this.hudContainer.add([this.navBg, this.coinText, this.levelText, this.expBar, this.shopBtn, this.pauseBtn, this.menuBtn]);
+        this.pauseBtn.on('pointerdown', () => this.togglePauseGame());
+
+        // --- SHOP & MENU LOGIC ---
+        this.shopElements = [];
+        const shopBg = this.add.rectangle(width / 2, height / 2, 450, 420, 0x3e2723).setStrokeStyle(4, 0x795548).setScrollFactor(0).setDepth(2000).setVisible(false);
+        const shopTitle = this.add.text(width / 2, height / 2 - 170, "UPGRADE SHOP", { fontSize: '28px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
+        this.shopElements.push(shopBg, shopTitle);
+
+        const addItem = (foodKey, cost, reqLevel, yOffset) => {
+            const bg = this.add.rectangle(width / 2, height / 2 + yOffset, 400, 55, 0x4e342e).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2001).setVisible(false);
+            const icon = this.add.image(width / 2 - 160, height / 2 + yOffset, foodKey).setScale(1.8).setScrollFactor(0).setDepth(2002).setVisible(false);
+            const name = foodKey.split('_')[1].toUpperCase();
+            const text = this.add.text(width / 2 - 120, height / 2 + yOffset, `Unlock ${name} (${cost} Coins) [REQ LV ${reqLevel}]`, { fontSize: '13px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002).setVisible(false);
+            this.shopElements.push(bg, icon, text);
+            bg.on('pointerdown', () => {
+                if (this.isGamePaused) return;
+                if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
+                    this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
+                    text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
+                }
+            });
+        };
+        addItem('food_burger', 30, 2, -100); addItem('food_croissant', 60, 3, -40); addItem('food_cake', 100, 5, 20);
+
+        const closeBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2002).setVisible(false);
+        this.shopElements.push(closeBtn);
+        closeBtn.on('pointerdown', () => this.shopElements.forEach(el => el.setVisible(false)));
+        this.shopBtn.on('pointerdown', () => { if (this.isGamePaused) return; this.menuElements.forEach(el => el.setVisible(false)); this.shopElements.forEach(el => el.setVisible(true)); });
+
+        this.menuElements = [];
+        const menuBg = this.add.rectangle(width / 2, height / 2, 500, 400, 0x2d1b18).setStrokeStyle(4, 0x8d6e63).setScrollFactor(0).setDepth(2000).setVisible(false);
+        const menuTitle = this.add.text(width / 2, height / 2 - 160, "OUR MENU", { fontSize: '32px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(2001).setVisible(false);
+        const closeMenuBtn = this.add.text(width / 2, height / 2 + 160, " [ BACK ] ", { fontSize: '24px', backgroundColor: '#5d4037', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(2001).setVisible(false);
+        this.menuElements = [menuBg, menuTitle, closeMenuBtn];
+
+        this.menuBtn.on('pointerdown', () => {
+            if (this.isGamePaused) return;
+            this.shopElements.forEach(el => el.setVisible(false));
+            this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
+            this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
+            this.menuElements.forEach(el => el.setVisible(true));
+            this.foodOptions.forEach((food, index) => {
+                const y = height / 2 - 80 + (index * 60);
+                const icon = this.add.image(width / 2 - 180, y, food).setScale(2).setScrollFactor(0).setDepth(2002);
+                const text = this.add.text(width / 2 - 140, y, `${food.split('_')[1].toUpperCase()} - 💰${this.foodPrices[food]}`, { fontSize: '20px' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(2002);
+                icon.isFoodItem = true; text.isFoodItem = true; this.menuElements.push(icon, text);
+            });
+        });
+        closeMenuBtn.on('pointerdown', () => this.menuElements.forEach(el => el.setVisible(false)));
+
+        // --- POP-UP OVERLAY PAUSE ---
+        this.pauseElements = [];
+        let pBg = this.add.rectangle(width / 2, height / 2, 450, 380, 0x4e342e, 0.95).setStrokeStyle(5, 0xf48fb1).setScrollFactor(0).setDepth(10000);
+        let pTitle = this.add.text(width / 2, height / 2 - 120, "KAFE DI-ISTIRAHATKAN", { fontSize: '28px', fontStyle: 'bold', fill: '#fff3e0', fontFamily: 'Courier New' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001);
+        let btnResume = this.add.text(width / 2, height / 2 - 25, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        let btnRestart = this.add.text(width / 2, height / 2 + 40, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        let btnExit = this.add.text(width / 2, height / 2 + 105, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(10001).setInteractive({ useHandCursor: true });
+        this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
+        this.pauseElements.forEach(el => el.setVisible(false));
+        btnResume.on('pointerdown', () => this.togglePauseGame());
+        btnRestart.on('pointerdown', () => this.scene.restart());
+        btnExit.on('pointerdown', () => this.scene.start('IntroScene'));
+
+        // --- GAMEPLAY ELEMENTS & GROUPS ---
         this.customerGroup = this.physics.add.group();
         this.moneyGroup = this.physics.add.group();
 
-        this.cookBtn = this.add.text(width / 2, height - 70, "🍳 MASAK 🍳", { fontSize: '28px', backgroundColor: '#8d6e63', padding: 15 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(500).setScrollFactor(0);
-        this.prosesImg = this.add.image(width / 2, height - 70, 'proses').setScale(0.6).setVisible(false).setDepth(500).setScrollFactor(0);
+        // --- FIX POSISI TOMBOL MASAK & PROSES LOADING (MENGIKUTI KOORDINAT MAP INTERNAL) ---
+        this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.28, "🍳 MASAK 🍳", {
+            fontSize: '24px',
+            backgroundColor: '#8d6e63',
+            padding: 12,
+            fontFamily: 'Courier New',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(500);
+
+        this.prosesImg = this.add.image(realMapWidth * 0.25, realMapHeight * 0.28, 'proses').setScale(0.6).setVisible(false).setDepth(500);
 
         this.heldContainer = this.add.container(0, 0).setVisible(false).setDepth(150);
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
@@ -229,42 +312,43 @@ class MainScene extends Phaser.Scene {
         this.customerTimer = this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
         this.spawnCustomer();
 
-        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => {
-            if (this.isGamePaused) return;
-            this.coins += m.coinValue;
-            this.gainExp(20);
-            m.destroy();
-        }, null, this);
+        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
 
         this.isFoodOnCounter = false; this.counterFoodKey = '';
-        this.counterFoodSprite = this.add.container(this.mapBg.x + this.realMapWidth * 0.33, this.mapBg.y + this.realMapHeight * 0.31).setVisible(false).setDepth(80);
+        this.counterFoodSprite = this.add.container(realMapWidth * 0.33, realMapHeight * 0.31).setVisible(false).setDepth(80);
         this.counterPlateImg = this.add.image(0, 5, 'plate').setScale(2.5);
         this.counterFoodImg = this.add.image(0, -5, 'food_coffee').setScale(1.2);
         this.counterFoodSprite.add([this.counterPlateImg, this.counterFoodImg]);
+
+        this.updateUI();
     }
 
     togglePauseGame() {
         this.isGamePaused = !this.isGamePaused;
-        const uiScene = this.scene.get('UIScene');
-
         if (this.isGamePaused) {
             this.player.setVelocity(0); this.player.anims.stop();
             this.physics.world.pause();
             this.customerTimer.paused = true;
-            this.customerGroup.getChildren().forEach(c => { c.setVelocity(0); c.anims.stop(); });
-            if (uiScene) uiScene.showPauseOverlay(true);
+            this.customerGroup.getChildren().forEach(c => {
+                c.setVelocity(0);
+                c.anims.stop();
+            });
+            this.pauseElements.forEach(el => el.setVisible(true));
         } else {
             this.physics.world.resume();
             this.customerTimer.paused = false;
-            if (uiScene) uiScene.showPauseOverlay(false);
+            this.pauseElements.forEach(el => el.setVisible(false));
 
+            // UNFREEZE LOGIC UNTUK PELANGGAN
+            const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+            const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
             this.customerGroup.getChildren().forEach(c => {
                 if (c.state === 'ARRIVING') {
                     c.play(`${c.customerName}_run_up`, true);
                     this.physics.moveTo(c, c.tx, c.ty, 150);
                 } else if (c.state === 'LEAVING') {
                     c.play(`${c.customerName}_run_down`, true);
-                    this.physics.moveTo(c, this.mapBg.x + this.realMapWidth * 0.49, this.mapBg.y + this.realMapHeight + 50, 150);
+                    this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
                 } else if (c.state === 'ORDERING' || c.state === 'WAITING' || c.state === 'EATING') {
                     c.play(`${c.customerName}_sit`, true);
                 }
@@ -279,6 +363,9 @@ class MainScene extends Phaser.Scene {
 
         if (this.isGamePaused) return;
 
+        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
+
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
         else if (this.cursors.D.isDown) { this.player.setVelocityX(this.baseSpeed); direction = 'right'; isMoving = true; }
@@ -291,12 +378,12 @@ class MainScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
 
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
-        const isInKitchen = (this.player.x >= this.mapBg.x + this.realMapWidth * 0.07 && this.player.x <= this.mapBg.x + this.realMapWidth * 0.46 && this.player.y < this.mapBg.y + this.realMapHeight * 0.33);
+        const isInKitchen = (this.player.x >= realMapWidth * 0.07 && this.player.x <= realMapWidth * 0.46 && this.player.y < realMapHeight * 0.33);
 
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
         if (this.isFoodOnCounter && !this.hasFood) {
-            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.mapBg.x + this.realMapWidth * 0.33, this.mapBg.y + this.realMapHeight * 0.31);
+            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, realMapWidth * 0.33, realMapHeight * 0.31);
             if (distanceToCounter < 110) {
                 this.isFoodOnCounter = false; this.counterFoodSprite.setVisible(false); this.hasFood = true;
                 this.heldFoodKey = this.counterFoodKey; this.heldFoodImg.setTexture(this.heldFoodKey);
@@ -316,11 +403,11 @@ class MainScene extends Phaser.Scene {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
                     this.time.delayedCall(4000, () => {
                         if (c.targetChair) c.targetChair.isOccupied = false;
-                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, this.mapBg.x + this.realMapWidth * 0.49, this.mapBg.y + this.realMapHeight + 50, 150);
+                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
                         c.state = 'LEAVING'; this.dropMoney(c.x, c.y, c.orderedFood);
                     });
                 }
-            } else if (c.state === 'LEAVING' && c.y > this.mapBg.y + this.realMapHeight) { c.bubble.destroy(); c.destroy(); }
+            } else if (c.state === 'LEAVING' && c.y > realMapHeight) { c.bubble.destroy(); c.destroy(); }
         });
     }
 
@@ -329,19 +416,28 @@ class MainScene extends Phaser.Scene {
         if (this.exp >= this.expToNextLevel) {
             this.exp -= this.expToNextLevel; this.level++;
             this.expToNextLevel = Math.floor(this.expToNextLevel * 1.5); this.baseSpeed += 15;
-            const lvUp = this.add.text(this.player.x, this.player.y - 50, "LEVEL UP!", { fontSize: '32px', color: '#ffeb3b', fontStyle: 'bold' }).setOrigin(0.5).setDepth(200);
+            const lvUp = this.add.text(this.player.x, this.player.y - 50, "LEVEL UP!", { fontSize: '32px', color: '#ffeb3b', fontStyle: 'bold' }).setOrigin(0.5);
             this.tweens.add({ targets: lvUp, y: lvUp.y - 100, alpha: 0, duration: 2000, onComplete: () => lvUp.destroy() });
         }
+        this.updateUI();
+    }
+
+    updateUI() {
+        this.coinText.setText(`💰 Coins: ${this.coins}`);
+        this.levelText.setText(`⭐ Level: ${this.level}`);
+        this.expBar.width = 130 * (this.exp / this.expToNextLevel);
     }
 
     spawnCustomer() {
         if (this.isGamePaused) return;
+        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
+        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
 
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
         freeChair.isOccupied = true;
         const name = ['adam', 'alex', 'bob'][Phaser.Math.Between(0, 2)];
-        const customer = this.physics.add.sprite(this.mapBg.x + this.realMapWidth * 0.49, this.mapBg.y + this.realMapHeight + 20, `${name}_run`).setScale(4.5);
+        const customer = this.physics.add.sprite(realMapWidth * 0.49, realMapHeight + 20, `${name}_run`).setScale(4.5);
         customer.customerName = name; customer.targetChair = freeChair; customer.state = 'ARRIVING';
         customer.tx = freeChair.x; customer.ty = freeChair.y;
         customer.bubble = this.add.container(0, 0).setVisible(false).setDepth(200);
@@ -381,114 +477,6 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-// ==========================================
-// 3. UI SCENE (KHUSUS NAVBAR ANTI-ZOOM & ANTI-RUSAK)
-// ==========================================
-class UIScene extends Phaser.Scene {
-    constructor() {
-        super('UIScene');
-    }
-
-    init(data) {
-        this.mainScene = data.mainScene;
-    }
-
-    create() {
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // Wadah HUD utama nempel statis di layar browser asli
-        this.hudContainer = this.add.container(0, 0).setDepth(9999);
-        this.navBg = this.add.rectangle(0, 0, width, 70, 0x3e2723, 0.9).setOrigin(0);
-        this.coinText = this.add.text(20, 20, `💰 Coins: 0`, { fontSize: '22px', fill: '#ffd54f', fontStyle: 'bold' });
-        this.levelText = this.add.text(width - 170, 20, `⭐ Level: 1`, { fontSize: '22px', fill: '#fff', fontStyle: 'bold' });
-        this.expBar = this.add.rectangle(width - 170, 50, 0, 10, 0x4caf50).setOrigin(0);
-
-        this.shopBtn = this.add.text(width / 2 - 130, 35, "🛒 SHOP", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        this.pauseBtn = this.add.text(width / 2, 35, "⏸ PAUSE", { fontSize: '18px', backgroundColor: '#d84315', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        this.menuBtn = this.add.text(width / 2 + 130, 35, "📋 MENU", { fontSize: '18px', backgroundColor: '#4e342e', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        this.hudContainer.add([this.navBg, this.coinText, this.levelText, this.expBar, this.shopBtn, this.pauseBtn, this.menuBtn]);
-        this.pauseBtn.on('pointerdown', () => this.mainScene.togglePauseGame());
-
-        // --- SHOP LAYOVER OVERLAY ---
-        this.shopElements = [];
-        const shopBg = this.add.rectangle(width / 2, height / 2, 450, 420, 0x3e2723).setStrokeStyle(4, 0x795548).setVisible(false).setDepth(10000);
-        const shopTitle = this.add.text(width / 2, height / 2 - 170, "UPGRADE SHOP", { fontSize: '28px', fontStyle: 'bold' }).setOrigin(0.5).setVisible(false).setDepth(10001);
-        this.shopElements.push(shopBg, shopTitle);
-
-        const addItem = (foodKey, cost, reqLevel, yOffset) => {
-            const bg = this.add.rectangle(width / 2, height / 2 + yOffset, 400, 55, 0x4e342e).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(10001);
-            const icon = this.add.image(width / 2 - 160, height / 2 + yOffset, foodKey).setScale(1.8).setVisible(false).setDepth(10002);
-            const name = foodKey.split('_')[1].toUpperCase();
-            const text = this.add.text(width / 2 - 120, height / 2 + yOffset, `Unlock ${name} (${cost} Coins) [REQ LV ${reqLevel}]`, { fontSize: '13px' }).setOrigin(0, 0.5).setVisible(false).setDepth(10002);
-            this.shopElements.push(bg, icon, text);
-            bg.on('pointerdown', () => {
-                if (this.mainScene.coins >= cost && this.mainScene.level >= reqLevel && !this.mainScene.foodOptions.includes(foodKey)) {
-                    this.mainScene.coins -= cost; this.mainScene.foodOptions.push(foodKey);
-                    text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
-                }
-            });
-        };
-        addItem('food_burger', 30, 2, -100); addItem('food_croissant', 60, 3, -40); addItem('food_cake', 100, 5, 20);
-
-        const closeBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(10002);
-        this.shopElements.push(closeBtn);
-        closeBtn.on('pointerdown', () => this.shopElements.forEach(el => el.setVisible(false)));
-        this.shopBtn.on('pointerdown', () => { this.menuElements.forEach(el => el.setVisible(false)); this.shopElements.forEach(el => el.setVisible(true)); });
-
-        // --- MENU LAYOVER OVERLAY ---
-        this.menuElements = [];
-        const menuBg = this.add.rectangle(width / 2, height / 2, 500, 400, 0x2d1b18).setStrokeStyle(4, 0x8d6e63).setVisible(false).setDepth(10000);
-        const menuTitle = this.add.text(width / 2, height / 2 - 160, "OUR MENU", { fontSize: '32px', fontStyle: 'bold' }).setOrigin(0.5).setVisible(false).setDepth(10001);
-        const closeMenuBtn = this.add.text(width / 2, height / 2 + 160, " [ BACK ] ", { fontSize: '24px', backgroundColor: '#5d4037', padding: 8 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(10001);
-        this.menuElements = [menuBg, menuTitle, closeMenuBtn];
-
-        this.menuBtn.on('pointerdown', () => {
-            this.shopElements.forEach(el => el.setVisible(false));
-            this.menuElements.forEach(el => { if (el.isFoodItem) el.destroy(); });
-            this.menuElements = this.menuElements.filter(el => !el.isFoodItem);
-            this.menuElements.forEach(el => el.setVisible(true));
-            this.mainScene.foodOptions.forEach((food, index) => {
-                const y = height / 2 - 80 + (index * 60);
-                const icon = this.add.image(width / 2 - 180, y, food).setScale(2).setDepth(10002);
-                const text = this.add.text(width / 2 - 140, y, `${food.split('_')[1].toUpperCase()} - 💰${this.mainScene.foodPrices[food]}`, { fontSize: '20px' }).setOrigin(0, 0.5).setDepth(10002);
-                icon.isFoodItem = true; text.isFoodItem = true; this.menuElements.push(icon, text);
-            });
-        });
-        closeMenuBtn.on('pointerdown', () => this.menuElements.forEach(el => el.setVisible(false)));
-
-        // --- PAUSE MENU OVERLAY ---
-        this.pauseElements = [];
-        let pBg = this.add.rectangle(width / 2, height / 2, 450, 380, 0x4e342e, 0.95).setStrokeStyle(5, 0xf48fb1).setDepth(20000);
-        let pTitle = this.add.text(width / 2, height / 2 - 120, "KAFE DI-ISTIRAHATKAN", { fontSize: '28px', fontStyle: 'bold', fill: '#fff3e0', fontFamily: 'Courier New' }).setOrigin(0.5).setDepth(20001);
-        let btnResume = this.add.text(width / 2, height / 2 - 25, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setDepth(20001).setInteractive({ useHandCursor: true });
-        let btnRestart = this.add.text(width / 2, height / 2 + 40, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setDepth(20001).setInteractive({ useHandCursor: true });
-        let btnExit = this.add.text(width / 2, height / 2 + 105, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setDepth(20001).setInteractive({ useHandCursor: true });
-
-        this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
-        this.pauseElements.forEach(el => el.setVisible(false));
-
-        btnResume.on('pointerdown', () => this.mainScene.togglePauseGame());
-        btnRestart.on('pointerdown', () => { this.scene.stop('UIScene'); this.mainScene.scene.restart(); });
-        btnExit.on('pointerdown', () => { this.scene.stop('UIScene'); this.mainScene.scene.start('IntroScene'); });
-    }
-
-    showPauseOverlay(show) {
-        this.pauseElements.forEach(el => el.setVisible(show));
-    }
-
-    update() {
-        if (!this.mainScene) return;
-        this.coinText.setText(`💰 Coins: ${this.mainScene.coins}`);
-        this.levelText.setText(`⭐ Level: ${this.mainScene.level}`);
-        this.expBar.width = 130 * (this.mainScene.exp / this.mainScene.expToNextLevel);
-    }
-}
-
-// ==========================================
-// 4. KUNCI KONFIGURASI PHASER ENGINE
-// ==========================================
 const config = {
     type: Phaser.AUTO,
     scale: {
@@ -500,6 +488,6 @@ const config = {
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
-    scene: [IntroScene, MainScene, UIScene] // UI dimasukkan ke daftar Scene resmi
+    scene: [IntroScene, MainScene]
 };
 new Phaser.Game(config);
