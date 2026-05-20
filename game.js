@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: PERFECT LAYOUT EDITION (NO BLACK SCREEN / NO OVERFLOW) ---
+// --- CICI'S BRASSERIE: PERFECT FULL SCREEN EDITION ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -57,18 +57,16 @@ class IntroScene extends Phaser.Scene {
         startBtn.on('pointerdown', () => this.scene.start('MainScene'));
 
         // ==========================================
-        // PERBAIKAN POP-UP TUTORIAL HOW TO PLAY (PAS DI KOTAK)
+        // POP-UP TUTORIAL HOW TO PLAY (PAS DI KOTAK)
         // ==========================================
         let tutorialGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
 
-        // Lebar kotak dinaikkan ke 750 dan tinggi ke 430 agar teks lega
         let tutBg = this.add.rectangle(width / 2, height / 2, 750, 430, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
 
         let tutTitle = this.add.text(width / 2, height / 2 - 165, "--- CARA BERMAIN ---", {
             fontSize: '30px', fontStyle: 'bold', fill: '#ffb74d', fontFamily: 'Courier New'
         }).setOrigin(0.5);
 
-        // Diberikan wordWrap agar teks membungkus otomatis sesuai lebar kotak
         let tutContent = this.add.text(width / 2, height / 2 - 10,
             "🏃 KONTROL GERAK:\nGunakan tombol W, A, S, D di keyboard untuk menggerakkan Amelia keliling kafe.\n\n" +
             "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar (X: 465) untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
@@ -78,7 +76,7 @@ class IntroScene extends Phaser.Scene {
             fill: '#ffffff',
             fontFamily: 'Courier New',
             lineHeight: 1.4,
-            wordWrap: { width: 690 } // Batas bungkus teks agar aman di dalam kotak
+            wordWrap: { width: 690 }
         }).setOrigin(0.5);
 
         let closeTutBtn = this.add.text(width / 2, height / 2 + 170, " [ CLOSE ] ", {
@@ -447,15 +445,17 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-
+// ==========================================
+// 3. CONFIGURATION POOL (MENGGUNAKAN MODE FIT YANG STABIL)
+// ==========================================
 const config = {
     type: Phaser.AUTO,
     scale: {
-        mode: Phaser.Scale.ENVELOP,
+        mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: window.innerWidth,
-        height: window.innerHeight
+        width: 1200,
+        height: 700
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
