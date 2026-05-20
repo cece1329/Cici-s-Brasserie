@@ -157,12 +157,12 @@ class MainScene extends Phaser.Scene {
 
         let sX = width / this.mapBg.width;
         let sY = height / this.mapBg.height;
-        let perfectScale = Math.max(sX, sY);
-        this.mapBg.setScale(perfectScale);
+        this.perfectScale = Math.max(sX, sY); // Simpan skala sempurna ke kelas global
+        this.mapBg.setScale(this.perfectScale);
 
         // Menghitung dimensi map real setelah di-scale
-        const realMapWidth = this.mapBg.width * perfectScale;
-        const realMapHeight = this.mapBg.height * perfectScale;
+        const realMapWidth = this.mapBg.width * this.perfectScale;
+        const realMapHeight = this.mapBg.height * this.perfectScale;
 
         this.physics.world.setBounds(0, 0, realMapWidth, realMapHeight);
 
@@ -294,7 +294,7 @@ class MainScene extends Phaser.Scene {
         this.customerGroup = this.physics.add.group();
         this.moneyGroup = this.physics.add.group();
 
-        // --- FIX TOMBOL MASAK & PROSES (DIGESER LEBIH KE ATAS BIAR KELIHATAN PAS ZOOM) ---
+        // --- FIX TOMBOL MASAK & PROSES PERBAIKAN KOORDINAT ATAS (0.16) ---
         this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.16, "🍳 MASAK 🍳", {
             fontSize: '22px',
             backgroundColor: '#8d6e63',
@@ -339,9 +339,9 @@ class MainScene extends Phaser.Scene {
             this.customerTimer.paused = false;
             this.pauseElements.forEach(el => el.setVisible(false));
 
-            // UNFREEZE LOGIC UNTUK PELANGGAN
-            const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-            const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
+            // UNFREEZE LOGIC MENGGUNAKAN VARIABEL SEKALA GLOBAL YANG KONSISTEN
+            const realMapWidth = this.mapBg.width * this.perfectScale;
+            const realMapHeight = this.mapBg.height * this.perfectScale;
             this.customerGroup.getChildren().forEach(c => {
                 if (c.state === 'ARRIVING') {
                     c.play(`${c.customerName}_run_up`, true);
@@ -363,8 +363,8 @@ class MainScene extends Phaser.Scene {
 
         if (this.isGamePaused) return;
 
-        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
+        const realMapWidth = this.mapBg.width * this.perfectScale;
+        const realMapHeight = this.mapBg.height * this.perfectScale;
 
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
@@ -430,8 +430,8 @@ class MainScene extends Phaser.Scene {
 
     spawnCustomer() {
         if (this.isGamePaused) return;
-        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
+        const realMapWidth = this.mapBg.width * this.perfectScale;
+        const realMapHeight = this.mapBg.height * this.perfectScale;
 
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
