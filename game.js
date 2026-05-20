@@ -245,6 +245,11 @@ class MainScene extends Phaser.Scene {
         this.load.image('food_coffee', 'asetgamepjbl/Pixel Art Food Pack/Cup of coffee.png');
         this.load.image('food_croissant', 'asetgamepjbl/Pixel Art Food Pack/Croissant.png');
         this.load.image('food_cake', 'asetgamepjbl/Pixel Art Food Pack/Strawberry cake.png');
+        this.load.image('food_tea', 'asetgamepjbl/Pixel Art Food Pack/Cup of tea.png');
+        this.load.image('food_toast', 'asetgamepjbl/Pixel Art Food Pack/Toast.png');
+        this.load.image('food_doughnut', 'asetgamepjbl/Pixel Art Food Pack/Strawberry doughnut.png');
+        this.load.image('food_avocadotoast', 'asetgamepjbl/Pixel Art Food Pack/Avocado toast.png');
+        this.load.image('food_meatballs', 'asetgamepjbl/Pixel Art Food Pack/Meatballs.png');
         this.load.image('plate', 'asetgamepjbl/Plate.png');
         this.load.spritesheet('coin', 'asetgamepjbl/coin.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('shine', 'asetgamepjbl/shine.png', { frameWidth: 16, frameHeight: 32 });
@@ -346,7 +351,17 @@ class MainScene extends Phaser.Scene {
         this.exp = 0;
         this.expToNextLevel = 50;
         this.baseSpeed = 250;
-        this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
+        this.foodPrices = { 
+            'food_coffee': 5, 
+            'food_tea': 8,
+            'food_toast': 12,
+            'food_burger': 20, 
+            'food_croissant': 28, 
+            'food_doughnut': 38,
+            'food_avocadotoast': 48,
+            'food_cake': 75,
+            'food_meatballs': 100
+        };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
@@ -408,32 +423,62 @@ class MainScene extends Phaser.Scene {
         // --- SHOP & MENU LOGIC ---
         this.shopContainer = this.add.container(uiX, uiY).setScrollFactor(0).setDepth(2000).setScale(uiScale).setVisible(false);
         this.shopElements = [];
-        const shopBg = this.add.rectangle(width / 2, height / 2, 450, 420, 0x3e2723).setStrokeStyle(4, 0x795548).setScrollFactor(0);
-        const shopTitle = this.add.text(width / 2, height / 2 - 170, "UPGRADE SHOP", { fontSize: '28px', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0);
+        const shopBg = this.add.rectangle(width / 2, height / 2, 720, 430, 0x3e2723).setStrokeStyle(4, 0x795548).setScrollFactor(0);
+        const shopTitle = this.add.text(width / 2, height / 2 - 175, "UPGRADE SHOP", { fontSize: '28px', fontStyle: 'bold', fontFamily: 'Courier New', fill: '#ffb74d' }).setOrigin(0.5).setScrollFactor(0);
         this.shopContainer.add([shopBg, shopTitle]);
         this.shopElements.push(shopBg, shopTitle);
 
-        const addItem = (foodKey, cost, reqLevel, yOffset) => {
-            const bg = this.add.rectangle(width / 2, height / 2 + yOffset, 400, 55, 0x4e342e).setInteractive({ useHandCursor: true }).setScrollFactor(0);
-            const icon = this.add.image(width / 2 - 160, height / 2 + yOffset, foodKey).setScale(1.8).setScrollFactor(0);
+        const addItem = (foodKey, cost, reqLevel, col, row) => {
+            const colX = (col === 0) ? (width / 2 - 165) : (width / 2 + 165);
+            const rowY = height / 2 - 105 + (row * 62);
+
+            const bg = this.add.rectangle(colX, rowY, 310, 52, 0x4e342e).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+            const icon = this.add.image(colX - 110, rowY, foodKey).setScale(1.8).setScrollFactor(0);
             const name = foodKey.split('_')[1].toUpperCase();
-            const text = this.add.text(width / 2 - 120, height / 2 + yOffset, `Unlock ${name} (${cost} Coins) [REQ LV ${reqLevel}]`, { fontSize: '13px' }).setOrigin(0, 0.5).setScrollFactor(0);
+            
+            const text = this.add.text(colX - 75, rowY, `Unlock ${name}\n💰${cost} | LV ${reqLevel}`, { 
+                fontSize: '11px', 
+                fontFamily: 'Courier New', 
+                fontStyle: 'bold',
+                fill: '#ffffff'
+            }).setOrigin(0, 0.5).setScrollFactor(0);
+
             this.shopContainer.add([bg, icon, text]);
             this.shopElements.push(bg, icon, text);
+
+            // Tampilkan hijau jika sudah dibeli
+            if (this.foodOptions.includes(foodKey)) {
+                bg.setFillStyle(0x2e7d32);
+                text.setText(`${name}\nUNLOCKED!`);
+            }
+
             bg.on('pointerdown', () => {
                 if (this.isGamePaused) return;
-                if (this.coins >= cost && this.level >= reqLevel && !this.foodOptions.includes(foodKey)) {
-                    this.coins -= cost; this.foodOptions.push(foodKey); this.updateUI();
-                    text.setText(`${name} UNLOCKED!`); bg.setFillStyle(0x2e7d32);
-                    this.sound.play('coin_cring', { volume: 0.8 }); // Play coin sound on unlock!
+                if (this.foodOptions.includes(foodKey)) return;
+                if (this.coins >= cost && this.level >= reqLevel) {
+                    this.coins -= cost; 
+                    this.foodOptions.push(foodKey); 
+                    this.updateUI();
+                    text.setText(`${name}\nUNLOCKED!`); 
+                    bg.setFillStyle(0x2e7d32);
+                    this.sound.play('coin_cring', { volume: 0.8 });
                 } else {
-                    this.sound.play('click_sfx', { volume: 0.3 }); // Fail/select click sound
+                    this.sound.play('click_sfx', { volume: 0.3 });
                 }
             });
         };
-        addItem('food_burger', 30, 2, -100); addItem('food_croissant', 60, 3, -40); addItem('food_cake', 100, 5, 20);
 
-        const closeBtn = this.add.text(width / 2, height / 2 + 110, " [ CLOSE ] ", { fontSize: '24px', backgroundColor: '#ff5252', padding: 10 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        // Grid 2x4 slot untuk unlock item
+        addItem('food_tea', 15, 1, 0, 0);
+        addItem('food_toast', 25, 2, 1, 0);
+        addItem('food_burger', 45, 2, 0, 1);
+        addItem('food_croissant', 60, 3, 1, 1);
+        addItem('food_doughnut', 80, 3, 0, 2);
+        addItem('food_avocadotoast', 100, 4, 1, 2);
+        addItem('food_cake', 150, 5, 0, 3);
+        addItem('food_meatballs', 200, 6, 1, 3);
+
+        const closeBtn = this.add.text(width / 2, height / 2 + 175, " [ CLOSE ] ", { fontSize: '20px', backgroundColor: '#ff5252', padding: 8, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScrollFactor(0);
         this.shopContainer.add(closeBtn);
         this.shopElements.push(closeBtn);
         closeBtn.on('pointerdown', () => {

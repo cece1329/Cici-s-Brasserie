@@ -59,8 +59,26 @@ graph TD
 
 ---
 
+## 📋 Daftar Menu & Alur Upgrade (Progression Path)
+
+Kamu memulai game dengan menu **Coffee** secara gratis. Pelanggan lain yang datang akan memesan variasi menu yang telah kamu buka di **Upgrade Shop**. Berikut alur lengkap menu makanan dan minuman yang bisa kamu buka:
+
+| Ikon | Nama Menu | Level Dibutuhkan | Biaya Unlock | Harga Jual (Koin Pelanggan) | Detail |
+| :---: | :--- | :---: | :---: | :---: | :--- |
+| ☕ | **Coffee** | Level 1 | *Gratis (Bawaan)* | **5 Koin** | Minuman dasar kafe, langsung terbuka dari awal permainan. |
+| 🍵 | **Tea** | Level 1 | 💰 15 Koin | **8 Koin** | Minuman teh hangat aromatik yang menenangkan. |
+| 🍞 | **Toast** | Level 2 | 💰 25 Koin | **12 Koin** | Roti panggang mentega klasik yang lezat. |
+| 🍔 | **Burger** | Level 2 | 💰 45 Koin | **20 Koin** | Burger daging tebal dengan keju lezat. |
+| 🥐 | **Croissant** | Level 3 | 💰 60 Koin | **28 Koin** | Roti sabit khas Prancis yang renyah dan gurih. |
+| 🍩 | **Doughnut** | Level 3 | 💰 80 Koin | **38 Koin** | Donat dengan saus stroberi manis di atasnya. |
+| 🥑 | **Avocado Toast** | Level 4 | 💰 100 Koin | **48 Koin** | Roti panggang sehat dengan alpukat tumbuk premium. |
+| 🍰 | **Strawberry Cake** | Level 5 | 💰 150 Koin | **75 Koin** | Kue bolu stroberi legendaris yang manis dan premium. |
+| 🧆 | **Meatballs** | Level 6 | 💰 200 Koin | **100 Koin** | Menu hidangan utama bakso lezat dengan keuntungan koin sangat tinggi! |
+
+---
+
 ## 👥 Pengembang / Author
-* **Developer**: Cece & Tim
+* **Developer**: Citra
 * **Project**: Tugas Besar / PJBL Game Kafe Impian
 
 ---
