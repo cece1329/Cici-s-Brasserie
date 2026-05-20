@@ -134,6 +134,10 @@ class MainScene extends Phaser.Scene {
         const height = this.scale.height;
         this.isGamePaused = false;
 
+        // KUNCI RESOLUSI MAP STATIS (Biar kamera mendeteksi area luar & mau bergerak follow)
+        this.MAP_WIDTH = 1600;
+        this.MAP_HEIGHT = 1200;
+
         // --- ANIMATIONS ---
         this.anims.create({ key: 'run_right', frames: this.anims.generateFrameNumbers('amelia_run', { start: 0, end: 5 }), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'run_up', frames: this.anims.generateFrameNumbers('amelia_run', { start: 6, end: 11 }), frameRate: 10, repeat: -1 });
@@ -152,19 +156,11 @@ class MainScene extends Phaser.Scene {
         this.anims.create({ key: 'coin_anim', frames: this.anims.generateFrameNumbers('coin'), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'shine_anim', frames: this.anims.generateFrameNumbers('shine'), frameRate: 8, repeat: -1 });
 
-        // --- MAP & PHYSICS (ANTI-GEPENG FIX) ---
-        this.mapBg = this.add.image(width / 2, height / 2, 'indoor').setOrigin(0.5);
+        // --- MAP & PHYSICS BACKGROUND ---
+        this.mapBg = this.add.image(0, 0, 'indoor').setOrigin(0, 0);
+        this.mapBg.setDisplaySize(this.MAP_WIDTH, this.MAP_HEIGHT);
 
-        let sX = width / this.mapBg.width;
-        let sY = height / this.mapBg.height;
-        let perfectScale = Math.max(sX, sY);
-        this.mapBg.setScale(perfectScale);
-
-        // Menghitung dimensi map real setelah di-scale
-        const realMapWidth = this.mapBg.width * perfectScale;
-        const realMapHeight = this.mapBg.height * perfectScale;
-
-        this.physics.world.setBounds(0, 0, realMapWidth, realMapHeight);
+        this.physics.world.setBounds(0, 0, this.MAP_WIDTH, this.MAP_HEIGHT);
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
@@ -172,44 +168,44 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(r, true);
             this.walls.add(r);
         };
-        addWall(0, 0, realMapWidth, 20);
-        addWall(0, realMapHeight - 20, realMapWidth, 20);
-        addWall(0, 0, 20, realMapHeight);
-        addWall(realMapWidth - 20, 0, 20, realMapHeight);
+        addWall(0, 0, this.MAP_WIDTH, 20);
+        addWall(0, this.MAP_HEIGHT - 20, this.MAP_WIDTH, 20);
+        addWall(0, 0, 20, this.MAP_HEIGHT);
+        addWall(this.MAP_WIDTH - 20, 0, 20, this.MAP_HEIGHT);
 
-        addWall(realMapWidth * 0.07, realMapHeight * 0.33, realMapWidth * 0.4, realMapHeight * 0.07);
-        addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
-        addWall(realMapWidth * 0.07, 0, realMapWidth * 0.4, realMapHeight * 0.23);
+        addWall(this.MAP_WIDTH * 0.07, this.MAP_HEIGHT * 0.33, this.MAP_WIDTH * 0.4, this.MAP_HEIGHT * 0.07);
+        addWall(this.MAP_WIDTH * 0.46, this.MAP_HEIGHT * 0.07, 40, this.MAP_HEIGHT * 0.26);
+        addWall(this.MAP_WIDTH * 0.07, 0, this.MAP_WIDTH * 0.4, this.MAP_HEIGHT * 0.23);
 
-        // --- STATUS GAME (COIN DINAIKKAN DARI 0 SEKARANG!) ---
+        // --- STATUS GAME ---
         this.coins = 0;
         this.level = 1;
         this.exp = 0;
         this.expToNextLevel = 50;
-        this.baseSpeed = 250;
+        this.baseSpeed = 350; // Kecepatan dinaikkan sedikit agar gerak di map luas terasa pas
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
         this.allChairs = [
-            { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: realMapWidth * 0.25, y: realMapHeight * 0.66, isOccupied: false, minLevel: 2 },
-            { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
-            { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
+            { x: this.MAP_WIDTH * 0.08, y: this.MAP_HEIGHT * 0.42, isOccupied: false, minLevel: 1 },
+            { x: this.MAP_WIDTH * 0.23, y: this.MAP_HEIGHT * 0.42, isOccupied: false, minLevel: 1 },
+            { x: this.MAP_WIDTH * 0.25, y: this.MAP_HEIGHT * 0.66, isOccupied: false, minLevel: 2 },
+            { x: this.MAP_WIDTH * 0.15, y: this.MAP_HEIGHT * 0.56, isOccupied: false, minLevel: 3 },
+            { x: this.MAP_WIDTH * 0.55, y: this.MAP_HEIGHT * 0.62, isOccupied: false, minLevel: 4 }
         ];
 
         // --- PLAYER (AMELIA) ---
-        this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
+        this.player = this.physics.add.sprite(this.MAP_WIDTH * 0.21, this.MAP_HEIGHT * 0.28, 'amelia_idle').setScale(4.5);
         this.player.setCollideWorldBounds(true);
         this.player.body.setSize(8, 6).setOffset(4, 26);
         this.player.setDepth(100);
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- SETTING KAMERA UTK FOLLOW AMELIA ---
-        this.cameras.main.setBounds(0, 0, realMapWidth, realMapHeight);
-        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        // --- KUNCI TOTAL: KAMERA SAKTI MENGIKUTI AMELIA ---
+        this.cameras.main.setBounds(0, 0, this.MAP_WIDTH, this.MAP_HEIGHT);
+        this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -307,7 +303,7 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
 
         this.isFoodOnCounter = false; this.counterFoodKey = '';
-        this.counterFoodSprite = this.add.container(realMapWidth * 0.33, realMapHeight * 0.31).setVisible(false).setDepth(80);
+        this.counterFoodSprite = this.add.container(this.MAP_WIDTH * 0.33, this.MAP_HEIGHT * 0.31).setVisible(false).setDepth(80);
         this.counterPlateImg = this.add.image(0, 5, 'plate').setScale(2.5);
         this.counterFoodImg = this.add.image(0, -5, 'food_coffee').setScale(1.2);
         this.counterFoodSprite.add([this.counterPlateImg, this.counterFoodImg]);
@@ -332,15 +328,13 @@ class MainScene extends Phaser.Scene {
             this.pauseElements.forEach(el => el.setVisible(false));
 
             // UNFREEZE LOGIC UNTUK PELANGGAN
-            const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-            const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
             this.customerGroup.getChildren().forEach(c => {
                 if (c.state === 'ARRIVING') {
                     c.play(`${c.customerName}_run_up`, true);
                     this.physics.moveTo(c, c.tx, c.ty, 150);
                 } else if (c.state === 'LEAVING') {
                     c.play(`${c.customerName}_run_down`, true);
-                    this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
+                    this.physics.moveTo(c, this.MAP_WIDTH * 0.49, this.MAP_HEIGHT + 50, 150);
                 } else if (c.state === 'ORDERING' || c.state === 'WAITING' || c.state === 'EATING') {
                     c.play(`${c.customerName}_sit`, true);
                 }
@@ -355,9 +349,6 @@ class MainScene extends Phaser.Scene {
 
         if (this.isGamePaused) return;
 
-        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
-
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
         else if (this.cursors.D.isDown) { this.player.setVelocityX(this.baseSpeed); direction = 'right'; isMoving = true; }
@@ -370,12 +361,12 @@ class MainScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
 
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
-        const isInKitchen = (this.player.x >= realMapWidth * 0.07 && this.player.x <= realMapWidth * 0.46 && this.player.y < realMapHeight * 0.33);
+        const isInKitchen = (this.player.x >= this.MAP_WIDTH * 0.07 && this.player.x <= this.MAP_WIDTH * 0.46 && this.player.y < this.MAP_HEIGHT * 0.33);
 
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
         if (this.isFoodOnCounter && !this.hasFood) {
-            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, realMapWidth * 0.33, realMapHeight * 0.31);
+            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.MAP_WIDTH * 0.33, this.MAP_HEIGHT * 0.31);
             if (distanceToCounter < 110) {
                 this.isFoodOnCounter = false; this.counterFoodSprite.setVisible(false); this.hasFood = true;
                 this.heldFoodKey = this.counterFoodKey; this.heldFoodImg.setTexture(this.heldFoodKey);
@@ -395,11 +386,11 @@ class MainScene extends Phaser.Scene {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
                     this.time.delayedCall(4000, () => {
                         if (c.targetChair) c.targetChair.isOccupied = false;
-                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, realMapWidth * 0.49, realMapHeight + 50, 150);
+                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, this.MAP_WIDTH * 0.49, this.MAP_HEIGHT + 50, 150);
                         c.state = 'LEAVING'; this.dropMoney(c.x, c.y, c.orderedFood);
                     });
                 }
-            } else if (c.state === 'LEAVING' && c.y > realMapHeight) { c.bubble.destroy(); c.destroy(); }
+            } else if (c.state === 'LEAVING' && c.y > this.MAP_HEIGHT) { c.bubble.destroy(); c.destroy(); }
         });
     }
 
@@ -422,14 +413,12 @@ class MainScene extends Phaser.Scene {
 
     spawnCustomer() {
         if (this.isGamePaused) return;
-        const realMapWidth = this.mapBg.width * this.mapBg.scaleX;
-        const realMapHeight = this.mapBg.height * this.mapBg.scaleY;
 
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
         freeChair.isOccupied = true;
         const name = ['adam', 'alex', 'bob'][Phaser.Math.Between(0, 2)];
-        const customer = this.physics.add.sprite(realMapWidth * 0.49, realMapHeight + 20, `${name}_run`).setScale(4.5);
+        const customer = this.physics.add.sprite(this.MAP_WIDTH * 0.49, this.MAP_HEIGHT + 20, `${name}_run`).setScale(4.5);
         customer.customerName = name; customer.targetChair = freeChair; customer.state = 'ARRIVING';
         customer.tx = freeChair.x; customer.ty = freeChair.y;
         customer.bubble = this.add.container(0, 0).setVisible(false).setDepth(200);
