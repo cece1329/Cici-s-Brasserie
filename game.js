@@ -213,11 +213,17 @@ class MainScene extends Phaser.Scene {
         ];
 
         // Memblokir area MEJA BESAR (Bukan per kursi)
-        // Meja Kiri (Ada 4 kursi di sekelilingnya)
-        addWall(realMapWidth * 0.06, realMapHeight * 0.48, realMapWidth * 0.24, realMapHeight * 0.22);
+        // Meja A (Kiri Pinggir)
+        addWall(realMapWidth * 0.03, realMapHeight * 0.58, realMapWidth * 0.18, realMapHeight * 0.28);
         
-        // Meja Kanan
-        addWall(realMapWidth * 0.45, realMapHeight * 0.52, realMapWidth * 0.2, realMapHeight * 0.22);
+        // Meja B (Kiri Tengah)
+        addWall(realMapWidth * 0.27, realMapHeight * 0.45, realMapWidth * 0.19, realMapHeight * 0.42);
+
+        // Meja C (Kanan Atas)
+        addWall(realMapWidth * 0.83, realMapHeight * 0.42, realMapWidth * 0.17, realMapHeight * 0.3);
+
+        // Meja Bundar (Kanan Bawah)
+        addWall(realMapWidth * 0.8, realMapHeight * 0.78, realMapWidth * 0.2, realMapHeight * 0.22);
 
         // --- PLAYER (AMELIA) ---
         this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
