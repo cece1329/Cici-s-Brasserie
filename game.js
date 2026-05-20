@@ -196,25 +196,22 @@ class MainScene extends Phaser.Scene {
         // 6. VENDING MACHINE (Mesin Minuman Kanan)
         addWall(realMapWidth * 0.87, realMapHeight * 0.3, realMapWidth * 0.13, realMapHeight * 0.32);
 
-        // 7. MEJA PELANGGAN & KURSI (4 Set Kelompok Meja + 1 Meja Kecil)
-        // Group A (Kiri Bawah)
-        addWall(realMapWidth * 0.02, realMapHeight * 0.6, realMapWidth * 0.16, realMapHeight * 0.24);
-        // Group B (Tengah Kiri)
-        addWall(realMapWidth * 0.2, realMapHeight * 0.55, realMapWidth * 0.18, realMapHeight * 0.23);
+        // 7. MEJA PELANGGAN & KURSI (Kelompok Meja)
+        // Group A (Kiri Bawah) -> Dipersempit agar ada celah jalan
+        addWall(realMapWidth * 0.02, realMapHeight * 0.6, realMapWidth * 0.13, realMapHeight * 0.24);
+        
+        // Group B (Tengah Kiri) -> Digeser ke kanan dikit agar celah dengan Group A lebih lebar
+        addWall(realMapWidth * 0.22, realMapHeight * 0.55, realMapWidth * 0.16, realMapHeight * 0.23);
+        
         // Group C (Kanan Atas)
         addWall(realMapWidth * 0.65, realMapHeight * 0.55, realMapWidth * 0.15, realMapHeight * 0.15);
+        
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
-        // Group E (Meja Vas Kecil Samping Vending Machine)
-        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
-
-        // 8. DEKORASI LAINNYA
-        // Tanaman Kiri Bawah
-        addWall(0, realMapHeight * 0.84, realMapWidth * 0.08, realMapHeight * 0.16);
-        // Tanaman Kanan Bawah
-        addWall(realMapWidth * 0.92, realMapHeight * 0.84, realMapWidth * 0.08, realMapHeight * 0.16);
-        // Sofa Bawah (Dekat pintu masuk)
-        addWall(realMapWidth * 0.29, realMapHeight * 0.86, realMapWidth * 0.12, realMapHeight * 0.11);
+        
+        // Group E (Meja Vas Kecil Samping Vending Machine) -> Dihapus agar tidak menghalangi jalan di sebelah kanan
+        
+        // 8. DEKORASI LAINNYA (Dihapus kotak merahnya agar Amelia bisa leluasa jalan di bagian bawah)
 
         // --- STATUS GAME ---
         this.coins = 0;
