@@ -447,17 +447,15 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-// ==========================================
-// 3. CONFIGURATION POOL (MENGGUNAKAN MODE FIT)
-// ==========================================
+
 const config = {
     type: Phaser.AUTO,
     scale: {
-        mode: Phaser.Scale.FIT, // Maksa canvas game proporsional se-layar tanpa bergeser
+        mode: Phaser.Scale.ENVELOP,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: 1200,            // Resolusi lebar standar horizontal
-        height: 700             // Resolusi tinggi standar horizontal
+        width: window.innerWidth,
+        height: window.innerHeight
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
