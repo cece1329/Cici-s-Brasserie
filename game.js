@@ -179,39 +179,38 @@ class MainScene extends Phaser.Scene {
 
         // 1. TOP WALL (Dinding Atas & Kabinet Dapur)
         addWall(0, 0, realMapWidth, realMapHeight * 0.27);
-        
+
         // 2. KITCHEN FRONT (Meja merah panjang + Bar Stools)
         addWall(realMapWidth * 0.05, realMapHeight * 0.32, realMapWidth * 0.42, realMapHeight * 0.16);
-        
+
         // 3. KITCHEN SIDE (Meja merah vertikal + Stools samping)
         addWall(realMapWidth * 0.47, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.11);
 
         // 4. JUKEBOX (Mesin Musik Tengah Atas) -> Dibuat lebih pendek agar tidak menutupi karpet oval
         addWall(realMapWidth * 0.6, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.12);
-        
+
         // 5. STAIRS (Tangga Kanan) -> Digeser mepet ke kanan agar tidak menutupi karpet oval
         addWall(realMapWidth * 0.82, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.08);
         addWall(realMapWidth * 0.77, realMapHeight * 0.35, realMapWidth * 0.05, realMapHeight * 0.08);
-        
+
         // 6. VENDING MACHINE (Mesin Minuman Kanan)
         addWall(realMapWidth * 0.87, realMapHeight * 0.3, realMapWidth * 0.13, realMapHeight * 0.32);
 
         // 7. MEJA PELANGGAN & KURSI (Kelompok Meja)
         // Group A (Kiri Bawah) -> Dipersempit agar ada celah jalan
         addWall(realMapWidth * 0.02, realMapHeight * 0.6, realMapWidth * 0.13, realMapHeight * 0.24);
-        
+
         // Group B (Tengah Kiri) -> Digeser ke kanan dikit agar celah dengan Group A lebih lebar
         addWall(realMapWidth * 0.22, realMapHeight * 0.55, realMapWidth * 0.16, realMapHeight * 0.23);
-        
+
         // Group C (Kanan Atas)
         addWall(realMapWidth * 0.65, realMapHeight * 0.55, realMapWidth * 0.15, realMapHeight * 0.15);
-        
+
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
-        
-        // Group E (Meja Vas Kecil Samping Vending Machine)
-        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
-        
+
+
+
         // 8. DEKORASI LAINNYA
         // Tanaman Kiri Bawah
         addWall(0, realMapHeight * 0.84, realMapWidth * 0.08, realMapHeight * 0.16);
@@ -325,7 +324,7 @@ class MainScene extends Phaser.Scene {
                 const y = height / 2 - 80 + (index * 60);
                 const icon = this.add.image(width / 2 - 180, y, food).setScale(2).setScrollFactor(0);
                 const text = this.add.text(width / 2 - 140, y, `${food.split('_')[1].toUpperCase()} - 💰${this.foodPrices[food]}`, { fontSize: '20px' }).setOrigin(0, 0.5).setScrollFactor(0);
-                icon.isFoodItem = true; text.isFoodItem = true; 
+                icon.isFoodItem = true; text.isFoodItem = true;
                 this.menuContainer.add([icon, text]);
                 this.menuElements.push(icon, text);
             });
@@ -340,7 +339,7 @@ class MainScene extends Phaser.Scene {
         let btnResume = this.add.text(width / 2, height / 2 - 25, "  🌸 KEMBALI BEKERJA  ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
         let btnRestart = this.add.text(width / 2, height / 2 + 40, "  🔄 ULANG HARI INI  ", { fontSize: '18px', fill: '#4e342e', backgroundColor: '#ffe0b2', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
         let btnExit = this.add.text(width / 2, height / 2 + 105, "  🚪 PULANG KE MENU   ", { fontSize: '18px', fill: '#ffffff', backgroundColor: '#880e4f', padding: 12, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setInteractive({ useHandCursor: true });
-        
+
         this.pauseContainer.add([pBg, pTitle, btnResume, btnRestart, btnExit]);
         this.pauseElements = [pBg, pTitle, btnResume, btnRestart, btnExit];
         btnResume.on('pointerdown', () => this.togglePauseGame());
@@ -480,7 +479,7 @@ class MainScene extends Phaser.Scene {
 
                 // Buat sprite terbang palsu untuk efek animasi ke UI
                 let flyingCoin = this.add.sprite(startX, startY, 'coin').setScale(2).setDepth(9999);
-                
+
                 this.tweens.add({
                     targets: flyingCoin,
                     // Terbang ke arah pojok kiri atas kamera (tempat navbar coin berada)
