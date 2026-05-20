@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: GITHUB PAGES COMPLETE REFRESH EDITION ---
+// --- CICI'S BRASSERIE: PERFECT LAYOUT EDITION (NO BLACK SCREEN / NO OVERFLOW) ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -56,16 +56,34 @@ class IntroScene extends Phaser.Scene {
 
         startBtn.on('pointerdown', () => this.scene.start('MainScene'));
 
-        // POP-UP TUTORIAL HOW TO PLAY
+        // ==========================================
+        // PERBAIKAN POP-UP TUTORIAL HOW TO PLAY (PAS DI KOTAK)
+        // ==========================================
         let tutorialGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
-        let tutBg = this.add.rectangle(width / 2, height / 2, 600, 380, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
-        let tutTitle = this.add.text(width / 2, height / 2 - 140, "--- CARA BERMAIN ---", { fontSize: '30px', fontStyle: 'bold', fill: '#ffb74d', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+        // Lebar kotak dinaikkan ke 750 dan tinggi ke 430 agar teks lega
+        let tutBg = this.add.rectangle(width / 2, height / 2, 750, 430, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
+
+        let tutTitle = this.add.text(width / 2, height / 2 - 165, "--- CARA BERMAIN ---", {
+            fontSize: '30px', fontStyle: 'bold', fill: '#ffb74d', fontFamily: 'Courier New'
+        }).setOrigin(0.5);
+
+        // Diberikan wordWrap agar teks membungkus otomatis sesuai lebar kotak
         let tutContent = this.add.text(width / 2, height / 2 - 10,
-            "🏃 KONTROL GERAK:\nGunakan tombol W, A, S, D di keyboard untuk\nmenggerakkan Amelia keliling kafe.\n\n" +
+            "🏃 KONTROL GERAK:\nGunakan tombol W, A, S, D di keyboard untuk menggerakkan Amelia keliling kafe.\n\n" +
             "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar (X: 465) untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
             "🛒 UPGRADE KAFE:\nGunakan koinmu di menu SHOP untuk membuka resep menu baru!\n" +
-            "⏸️ PAUSE MENU:\nTekan tombol P, ESC, atau klik tombol PAUSE di navbar.", { fontSize: '15px', fill: '#ffffff', fontFamily: 'Courier New', lineHeight: 1.4 }).setOrigin(0.5);
-        let closeTutBtn = this.add.text(width / 2, height / 2 + 140, " [ CLOSE ] ", { fontSize: '20px', fill: '#ffffff', backgroundColor: '#d32f2f', padding: 8, fontFamily: 'Courier New' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            "⏸️ PAUSE MENU:\nTekan tombol P, ESC, atau klik tombol PAUSE di navbar.", {
+            fontSize: '14px',
+            fill: '#ffffff',
+            fontFamily: 'Courier New',
+            lineHeight: 1.4,
+            wordWrap: { width: 690 } // Batas bungkus teks agar aman di dalam kotak
+        }).setOrigin(0.5);
+
+        let closeTutBtn = this.add.text(width / 2, height / 2 + 170, " [ CLOSE ] ", {
+            fontSize: '20px', fill: '#ffffff', backgroundColor: '#d32f2f', padding: 8, fontFamily: 'Courier New'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         closeTutBtn.on('pointerover', () => closeTutBtn.setStyle({ backgroundColor: '#b71c1c' }));
         closeTutBtn.on('pointerout', () => closeTutBtn.setStyle({ backgroundColor: '#d32f2f' }));
@@ -92,11 +110,9 @@ class MainScene extends Phaser.Scene {
         this.load.on('progress', (v) => loadingText.setText(`Mempersiapkan Kafe Cici... ${Math.floor(v * 100)}%`));
         this.load.on('complete', () => loadingText.destroy());
 
-        // Assets Barista Amelia
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('amelia_run', 'asetgamepjbl/barista/Amelia_run_16x16.png', { frameWidth: 16, frameHeight: 32 });
 
-        // Assets Pelanggan (Case-Sensitive Safe)
         ['adam', 'alex', 'bob'].forEach(name => {
             const path = `asetgamepjbl/pelanggan/${name.charAt(0).toUpperCase() + name.slice(1)}/`;
             const base = name.charAt(0).toUpperCase() + name.slice(1);
@@ -105,7 +121,6 @@ class MainScene extends Phaser.Scene {
             this.load.spritesheet(`${name}_sit`, `${path}${base}_sit_16x16.png`, { frameWidth: 32, frameHeight: 32 });
         });
 
-        // Lain-lain
         this.load.image('bubble_pesan', 'asetgamepjbl/bubblechatpesan.png');
         this.load.image('proses', 'asetgamepjbl/proses.png');
         this.load.image('indoor', 'asetgamepjbl/indoor.png');
@@ -433,16 +448,16 @@ class MainScene extends Phaser.Scene {
 }
 
 // ==========================================
-// 3. CONFIGURATION POOL (MENGGUNAKAN MODE RESIZE)
+// 3. CONFIGURATION POOL (MENGGUNAKAN MODE FIT)
 // ==========================================
 const config = {
     type: Phaser.AUTO,
     scale: {
-        mode: Phaser.Scale.RESIZE,
+        mode: Phaser.Scale.FIT, // Maksa canvas game proporsional se-layar tanpa bergeser
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: '100%',
-        height: '100%'
+        width: 1200,            // Resolusi lebar standar horizontal
+        height: 700             // Resolusi tinggi standar horizontal
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
