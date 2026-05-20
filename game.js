@@ -186,8 +186,7 @@ class MainScene extends Phaser.Scene {
         // 3. KITCHEN SIDE (Meja merah vertikal + Stools samping)
         addWall(realMapWidth * 0.47, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.11);
 
-        // 4. JUKEBOX (Mesin Musik Tengah Atas) -> Dibuat lebih pendek agar tidak menutupi karpet oval
-        addWall(realMapWidth * 0.6, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.12);
+
 
         // 5. STAIRS (Tangga Kanan) -> Digeser mepet ke kanan agar tidak menutupi karpet oval
         addWall(realMapWidth * 0.82, realMapHeight * 0.27, realMapWidth * 0.06, realMapHeight * 0.08);
@@ -209,7 +208,8 @@ class MainScene extends Phaser.Scene {
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
 
-
+        // Group E (Meja Vas Kecil Samping Vending Machine)
+        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
 
         // 8. DEKORASI LAINNYA
         // Tanaman Kiri Bawah
