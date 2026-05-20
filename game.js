@@ -157,7 +157,7 @@ class MainScene extends Phaser.Scene {
 
         let sX = width / this.mapBg.width;
         let sY = height / this.mapBg.height;
-        this.perfectScale = Math.max(sX, sY); // Simpan skala sempurna ke kelas global
+        this.perfectScale = Math.max(sX, sY);
         this.mapBg.setScale(this.perfectScale);
 
         // Menghitung dimensi map real setelah di-scale
@@ -207,9 +207,10 @@ class MainScene extends Phaser.Scene {
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- SETTING KAMERA UTK FOLLOW AMELIA ---
+        // --- ⚡ FIX UTAMA: SETTING KAMERA ZOOM BIAR KAFE KELIHATAN DEKAT ⚡ ---
         this.cameras.main.setBounds(0, 0, realMapWidth, realMapHeight);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        this.cameras.main.setZoom(2.3); // Kamera otomatis nge-zoom pixel art biar gemas dan gak kejauhan!
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -294,16 +295,16 @@ class MainScene extends Phaser.Scene {
         this.customerGroup = this.physics.add.group();
         this.moneyGroup = this.physics.add.group();
 
-        // --- FIX TOMBOL MASAK & PROSES PERBAIKAN KOORDINAT ATAS (0.16) ---
-        this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.16, "🍳 MASAK 🍳", {
-            fontSize: '22px',
+        // --- 🍳 POSISI TOMBOL MASAK AMAN (Disesuaikan dengan Zoom 2.3) 🍳 ---
+        this.cookBtn = this.add.text(realMapWidth * 0.25, realMapHeight * 0.23, "🍳 MASAK 🍳", {
+            fontSize: '15px', // Diperkecil sedikit karena ikut membesar efek zoom kamera
             backgroundColor: '#8d6e63',
-            padding: 10,
+            padding: 8,
             fontFamily: 'Courier New',
             fontStyle: 'bold'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(500);
 
-        this.prosesImg = this.add.image(realMapWidth * 0.25, realMapHeight * 0.16, 'proses').setScale(0.6).setVisible(false).setDepth(500);
+        this.prosesImg = this.add.image(realMapWidth * 0.25, realMapHeight * 0.23, 'proses').setScale(0.5).setVisible(false).setDepth(500);
 
         this.heldContainer = this.add.container(0, 0).setVisible(false).setDepth(150);
         this.heldContainer.add([this.add.image(0, 8, 'plate').setScale(3), this.heldFoodImg = this.add.image(0, -8, 'food_coffee').setScale(1.5)]);
@@ -339,7 +340,6 @@ class MainScene extends Phaser.Scene {
             this.customerTimer.paused = false;
             this.pauseElements.forEach(el => el.setVisible(false));
 
-            // UNFREEZE LOGIC MENGGUNAKAN VARIABEL SEKALA GLOBAL YANG KONSISTEN
             const realMapWidth = this.mapBg.width * this.perfectScale;
             const realMapHeight = this.mapBg.height * this.perfectScale;
             this.customerGroup.getChildren().forEach(c => {
