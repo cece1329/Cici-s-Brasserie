@@ -208,8 +208,7 @@ class MainScene extends Phaser.Scene {
         // Group D (Meja Bundar Kanan Bawah)
         addWall(realMapWidth * 0.65, realMapHeight * 0.72, realMapWidth * 0.2, realMapHeight * 0.22);
 
-        // Group E (Meja Vas Kecil Samping Vending Machine)
-        addWall(realMapWidth * 0.84, realMapHeight * 0.63, realMapWidth * 0.06, realMapHeight * 0.12);
+
 
         // 8. DEKORASI LAINNYA
         // Tanaman Kiri Bawah
