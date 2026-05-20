@@ -168,7 +168,7 @@ class MainScene extends Phaser.Scene {
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
-            const r = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0xff0000, 0);
+            const r = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0xff0000, 0.5).setDepth(999);
             this.physics.add.existing(r, true);
             this.walls.add(r);
         };
