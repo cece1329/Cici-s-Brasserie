@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: GITHUB PAGES UI-FIXED & CLEAN EDITION ---
+// --- CICI'S BRASSERIE: GITHUB PAGES COMPLETE REFRESH EDITION ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -96,7 +96,7 @@ class MainScene extends Phaser.Scene {
         this.load.spritesheet('amelia_idle', 'asetgamepjbl/barista/Amelia_idle_anim_16x16.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('amelia_run', 'asetgamepjbl/barista/Amelia_run_16x16.png', { frameWidth: 16, frameHeight: 32 });
 
-        // Assets Pelanggan
+        // Assets Pelanggan (Case-Sensitive Safe)
         ['adam', 'alex', 'bob'].forEach(name => {
             const path = `asetgamepjbl/pelanggan/${name.charAt(0).toUpperCase() + name.slice(1)}/`;
             const base = name.charAt(0).toUpperCase() + name.slice(1);
@@ -119,7 +119,6 @@ class MainScene extends Phaser.Scene {
     }
 
     create() {
-        // PERBAIKAN UTAMA: Mengunci ukuran asli layar monitor browser di GitHub Pages
         const width = this.scale.width;
         const height = this.scale.height;
         this.isGamePaused = false;
@@ -283,7 +282,6 @@ class MainScene extends Phaser.Scene {
 
         this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
 
-        // Tempat Saji di Meja Bar
         this.isFoodOnCounter = false;
         this.counterFoodKey = '';
 
@@ -317,7 +315,6 @@ class MainScene extends Phaser.Scene {
 
         if (this.isGamePaused) return;
 
-        // Gerakan Utama Amelia WASD
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
         else if (this.cursors.D.isDown) { this.player.setVelocityX(this.baseSpeed); direction = 'right'; isMoving = true; }
@@ -329,14 +326,11 @@ class MainScene extends Phaser.Scene {
         if (this.hasFood) this.heldContainer.setPosition(this.player.x, this.player.y - 50);
         this.player.setDepth(this.player.y);
 
-        // Munculkan Tombol Masak Hanya di Area Dapur Atas & Ketika Ada Antrean Pesanan
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
         const isInKitchen = (this.player.x >= 100 && this.player.x <= 650 && this.player.y < 380);
 
-        // Memastikan tombol masak mengikuti skala window browser ter-update
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
-        // Ambil Makanan dari Meja Saji Bar
         if (this.isFoodOnCounter && !this.hasFood) {
             let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, 465, 355);
             if (distanceToCounter < 110) {
@@ -349,7 +343,6 @@ class MainScene extends Phaser.Scene {
             }
         }
 
-        // Siklus Logika Pelanggan Datang & Dilayani Amelia
         this.customerGroup.getChildren().forEach(c => {
             c.setDepth(c.y);
             if (c.state === 'ARRIVING') {
@@ -420,7 +413,6 @@ class MainScene extends Phaser.Scene {
                 this.isCooking = false;
                 this.prosesImg.setVisible(false);
 
-                // Makanan ditaruh langsung ke Meja Bar Saji
                 this.isFoodOnCounter = true;
                 this.counterFoodKey = target.orderedFood;
                 this.counterFoodImg.setTexture(this.counterFoodKey);
