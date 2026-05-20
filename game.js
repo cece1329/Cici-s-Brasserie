@@ -1,4 +1,4 @@
-// --- CICI'S BRASSERIE: PERFECT FULL SCREEN EDITION ---
+// --- CICI'S BRASSERIE: NO-DISTORTION & BUG-FREE RESIZE EDITION ---
 
 // ==========================================
 // 1. INTRO SCENE (MAIN MENU SCREEN)
@@ -14,9 +14,16 @@ class IntroScene extends Phaser.Scene {
     }
 
     create() {
-        const { width, height } = this.scale;
+        const width = this.scale.width;
+        const height = this.scale.height;
 
-        let bg = this.add.image(0, 0, 'intro_bg').setOrigin(0, 0).setDisplaySize(width, height);
+        // Trik anti-gepeng untuk background Intro
+        let bg = this.add.image(width / 2, height / 2, 'intro_bg').setOrigin(0.5);
+        let scaleX = width / bg.width;
+        let scaleY = height / bg.height;
+        let scale = Math.max(scaleX, scaleY); // Ambil skala terbesar agar menutup layar proporsional
+        bg.setScale(scale);
+
         this.add.rectangle(0, 0, width, height, 0x2d1b18, 0.55).setOrigin(0);
 
         if (!this.anims.exists('menu_amelia_idle')) {
@@ -39,12 +46,10 @@ class IntroScene extends Phaser.Scene {
             fontSize: '20px', fill: '#fff3e0', fontStyle: 'italic', fontFamily: 'Courier New'
         }).setOrigin(0.5);
 
-        // TOMBOL 1: START GAME
         let startBtn = this.add.text(width / 2, height / 2 + 100, " 🌸 START GAME 🌸 ", {
             fontSize: '26px', fill: '#ffffff', backgroundColor: '#f48fb1', padding: { x: 25, y: 12 }, fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        // TOMBOL 2: HOW TO PLAY
         let howToBtn = this.add.text(width / 2, height / 2 + 175, " 📋 HOW TO PLAY 📋 ", {
             fontSize: '22px', fill: '#fff3e0', backgroundColor: '#8d6e63', padding: { x: 20, y: 10 }, fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -56,11 +61,7 @@ class IntroScene extends Phaser.Scene {
 
         startBtn.on('pointerdown', () => this.scene.start('MainScene'));
 
-        // ==========================================
-        // POP-UP TUTORIAL HOW TO PLAY (PAS DI KOTAK)
-        // ==========================================
         let tutorialGroup = this.add.container(0, 0).setDepth(2000).setVisible(false);
-
         let tutBg = this.add.rectangle(width / 2, height / 2, 750, 430, 0x3e2723, 0.95).setStrokeStyle(5, '#ffb74d');
 
         let tutTitle = this.add.text(width / 2, height / 2 - 165, "--- CARA BERMAIN ---", {
@@ -72,11 +73,7 @@ class IntroScene extends Phaser.Scene {
             "☕ ALUR BISNIS KAFE:\n1. Klik Bubble Chat Pesanan di atas kepala pelanggan.\n2. Berjalan ke area dapur atas, lalu klik tombol KOKI [MASAK].\n3. Tunggu sampai matang, dekati meja bar (X: 465) untuk ambil makanan.\n4. Dekati pelanggan yang memesan untuk mengantarkannya.\n5. Ambil koin emas 💰 di meja setelah mereka selesai makan!\n\n" +
             "🛒 UPGRADE KAFE:\nGunakan koinmu di menu SHOP untuk membuka resep menu baru!\n" +
             "⏸️ PAUSE MENU:\nTekan tombol P, ESC, atau klik tombol PAUSE di navbar.", {
-            fontSize: '14px',
-            fill: '#ffffff',
-            fontFamily: 'Courier New',
-            lineHeight: 1.4,
-            wordWrap: { width: 690 }
+            fontSize: '14px', fill: '#ffffff', fontFamily: 'Courier New', lineHeight: 1.4, wordWrap: { width: 690 }
         }).setOrigin(0.5);
 
         let closeTutBtn = this.add.text(width / 2, height / 2 + 170, " [ CLOSE ] ", {
@@ -103,7 +100,8 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        const { width, height } = this.scale;
+        const width = this.scale.width;
+        const height = this.scale.height;
         const loadingText = this.add.text(width / 2, height / 2, "Mempersiapkan Kafe Cici... 0%", { fontSize: '32px', fill: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
         this.load.on('progress', (v) => loadingText.setText(`Mempersiapkan Kafe Cici... ${Math.floor(v * 100)}%`));
         this.load.on('complete', () => loadingText.destroy());
@@ -154,10 +152,16 @@ class MainScene extends Phaser.Scene {
         this.anims.create({ key: 'coin_anim', frames: this.anims.generateFrameNumbers('coin'), frameRate: 10, repeat: -1 });
         this.anims.create({ key: 'shine_anim', frames: this.anims.generateFrameNumbers('shine'), frameRate: 8, repeat: -1 });
 
-        // --- MAP & PHYSICS ---
-        const MAP_W = 1402; const MAP_H = 1122;
-        this.add.image(0, 0, 'indoor').setOrigin(0, 0).setDisplaySize(MAP_W, MAP_H);
-        this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
+        // --- MAP & PHYSICS (ANTI-GEPENG FIX) ---
+        this.mapBg = this.add.image(width / 2, height / 2, 'indoor').setOrigin(0.5);
+
+        // Kalkulasi rasio aspek pintar agar gambar proporsional, tidak ditarik lonjong/gepeng
+        let sX = width / this.mapBg.width;
+        let sY = height / this.mapBg.height;
+        let perfectScale = Math.max(sX, sY);
+        this.mapBg.setScale(perfectScale);
+
+        this.physics.world.setBounds(0, 0, width, height);
 
         this.walls = this.physics.add.staticGroup();
         const addWall = (x, y, w, h) => {
@@ -165,41 +169,36 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(r, true);
             this.walls.add(r);
         };
-        addWall(0, 0, MAP_W, 20); addWall(0, MAP_H - 20, MAP_W, 20); addWall(0, 0, 20, MAP_H); addWall(MAP_W - 20, 0, 20, MAP_H);
-        addWall(100, 380, 550, 80); addWall(648, 88, 40, 300); addWall(100, 0, 550, 260);
+        addWall(0, 0, width, 20); addWall(0, height - 20, width, 20); addWall(0, 0, 20, height); addWall(width - 20, 0, 20, height);
+        addWall(width * 0.07, height * 0.33, width * 0.4, height * 0.07);
+        addWall(width * 0.46, height * 0.07, 40, height * 0.26);
+        addWall(width * 0.07, 0, width * 0.4, height * 0.23);
 
         // --- STATUS GAME ---
-        this.coins = 750;
-        this.level = 1;
-        this.exp = 0;
-        this.expToNextLevel = 50;
-
+        this.coins = 750; this.level = 1; this.exp = 0; this.expToNextLevel = 50;
         this.baseSpeed = 250;
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
 
         this.allChairs = [
-            { x: 115, y: 480, isOccupied: false, minLevel: 1 },
-            { x: 330, y: 480, isOccupied: false, minLevel: 1 },
-            { x: 355, y: 750, isOccupied: false, minLevel: 2 },
-            { x: 215, y: 630, isOccupied: false, minLevel: 3 },
-            { x: 775, y: 700, isOccupied: false, minLevel: 4 }
+            { x: width * 0.08, y: height * 0.42, isOccupied: false, minLevel: 1 },
+            { x: width * 0.23, y: height * 0.42, isOccupied: false, minLevel: 1 },
+            { x: width * 0.25, y: height * 0.66, isOccupied: false, minLevel: 2 },
+            { x: width * 0.15, y: height * 0.56, isOccupied: false, minLevel: 3 },
+            { x: width * 0.55, y: height * 0.62, isOccupied: false, minLevel: 4 }
         ];
 
         // --- PLAYER (AMELIA) ---
-        this.player = this.physics.add.sprite(300, 320, 'amelia_idle').setScale(4.5);
+        this.player = this.physics.add.sprite(width * 0.21, height * 0.28, 'amelia_idle').setScale(4.5);
         this.player.setCollideWorldBounds(true);
         this.player.body.setSize(8, 6).setOffset(4, 26);
         this.player.setDepth(100);
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- CAMERA SYSTEM ---
-        this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
-        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        this.cameras.main.setBounds(0, 0, width, height);
 
-        // Input Keyboard
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.pauseKeyEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -295,10 +294,8 @@ class MainScene extends Phaser.Scene {
 
         this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
 
-        this.isFoodOnCounter = false;
-        this.counterFoodKey = '';
-
-        this.counterFoodSprite = this.add.container(465, 355).setVisible(false).setDepth(80);
+        this.isFoodOnCounter = false; this.counterFoodKey = '';
+        this.counterFoodSprite = this.add.container(width * 0.33, height * 0.31).setVisible(false).setDepth(80);
         this.counterPlateImg = this.add.image(0, 5, 'plate').setScale(2.5);
         this.counterFoodImg = this.add.image(0, -5, 'food_coffee').setScale(1.2);
         this.counterFoodSprite.add([this.counterPlateImg, this.counterFoodImg]);
@@ -306,18 +303,39 @@ class MainScene extends Phaser.Scene {
         this.updateUI();
     }
 
+    // ==========================================
+    // FIX BUG UNFREEZE CUSTOMER PAS RESUME GAME
+    // ==========================================
     togglePauseGame() {
         this.isGamePaused = !this.isGamePaused;
         if (this.isGamePaused) {
             this.player.setVelocity(0); this.player.anims.stop();
             this.physics.world.pause();
             this.customerTimer.paused = true;
-            this.customerGroup.getChildren().forEach(c => { c.setVelocity(0); c.anims.stop(); });
+            this.customerGroup.getChildren().forEach(c => {
+                c.savedVelocityX = c.body.velocity.x; // Catat kecepatan x terakhir sebelum diam
+                c.savedVelocityY = c.body.velocity.y; // Catat kecepatan y terakhir sebelum diam
+                c.setVelocity(0);
+                c.anims.stop();
+            });
             this.pauseElements.forEach(el => el.setVisible(true));
         } else {
             this.physics.world.resume();
             this.customerTimer.paused = false;
             this.pauseElements.forEach(el => el.setVisible(false));
+
+            // AKTIFKAN KEMBALI SEMUA CUSTOMER YANG BEKU
+            this.customerGroup.getChildren().forEach(c => {
+                if (c.state === 'ARRIVING') {
+                    c.play(`${c.customerName}_run_up`, true);
+                    this.physics.moveTo(c, c.tx, c.ty, 150); // Paksa jalan lagi ke target kursi
+                } else if (c.state === 'LEAVING') {
+                    c.play(`${c.customerName}_run_down`, true);
+                    this.physics.moveTo(c, this.scale.width * 0.49, this.scale.height + 50, 150); // Paksa jalan keluar
+                } else if (c.state === 'ORDERING' || c.state === 'WAITING' || c.state === 'EATING') {
+                    c.play(`${c.customerName}_sit`, true); // Aktifkan animasi duduk kembali
+                }
+            });
         }
     }
 
@@ -327,6 +345,9 @@ class MainScene extends Phaser.Scene {
         }
 
         if (this.isGamePaused) return;
+
+        const width = this.scale.width;
+        const height = this.scale.height;
 
         let isMoving = false; let direction = 'down'; this.player.setVelocity(0);
         if (this.cursors.A.isDown) { this.player.setVelocityX(-this.baseSpeed); direction = 'left'; isMoving = true; }
@@ -340,18 +361,15 @@ class MainScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
 
         const needsCook = this.customerGroup.getChildren().some(c => c.state === 'NEEDS_COOKING');
-        const isInKitchen = (this.player.x >= 100 && this.player.x <= 650 && this.player.y < 380);
+        const isInKitchen = (this.player.x >= width * 0.07 && this.player.x <= width * 0.46 && this.player.y < height * 0.33);
 
         this.cookBtn.setVisible(needsCook && isInKitchen && !this.hasFood && !this.isCooking);
 
         if (this.isFoodOnCounter && !this.hasFood) {
-            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, 465, 355);
+            let distanceToCounter = Phaser.Math.Distance.Between(this.player.x, this.player.y, width * 0.33, height * 0.31);
             if (distanceToCounter < 110) {
-                this.isFoodOnCounter = false;
-                this.counterFoodSprite.setVisible(false);
-                this.hasFood = true;
-                this.heldFoodKey = this.counterFoodKey;
-                this.heldFoodImg.setTexture(this.heldFoodKey);
+                this.isFoodOnCounter = false; this.counterFoodSprite.setVisible(false); this.hasFood = true;
+                this.heldFoodKey = this.counterFoodKey; this.heldFoodImg.setTexture(this.heldFoodKey);
                 this.heldContainer.setVisible(true);
             }
         }
@@ -368,11 +386,11 @@ class MainScene extends Phaser.Scene {
                     this.hasFood = false; this.heldContainer.setVisible(false); c.state = 'EATING';
                     this.time.delayedCall(4000, () => {
                         if (c.targetChair) c.targetChair.isOccupied = false;
-                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, 690, 1170, 150);
+                        c.play(`${c.customerName}_run_down`); this.physics.moveTo(c, width * 0.49, height + 50, 150);
                         c.state = 'LEAVING'; this.dropMoney(c.x, c.y, c.orderedFood);
                     });
                 }
-            } else if (c.state === 'LEAVING' && c.y > 1120) { c.bubble.destroy(); c.destroy(); }
+            } else if (c.state === 'LEAVING' && c.y > height) { c.bubble.destroy(); c.destroy(); }
         });
     }
 
@@ -380,8 +398,7 @@ class MainScene extends Phaser.Scene {
         this.exp += amount;
         if (this.exp >= this.expToNextLevel) {
             this.exp -= this.expToNextLevel; this.level++;
-            this.expToNextLevel = Math.floor(this.expToNextLevel * 1.5);
-            this.baseSpeed += 15;
+            this.expToNextLevel = Math.floor(this.expToNextLevel * 1.5); this.baseSpeed += 15;
             const lvUp = this.add.text(this.player.x, this.player.y - 50, "LEVEL UP!", { fontSize: '32px', color: '#ffeb3b', fontStyle: 'bold' }).setOrigin(0.5);
             this.tweens.add({ targets: lvUp, y: lvUp.y - 100, alpha: 0, duration: 2000, onComplete: () => lvUp.destroy() });
         }
@@ -396,11 +413,14 @@ class MainScene extends Phaser.Scene {
 
     spawnCustomer() {
         if (this.isGamePaused) return;
+        const width = this.scale.width;
+        const height = this.scale.height;
+
         const freeChair = Phaser.Math.RND.pick(this.allChairs.filter(ch => !ch.isOccupied && this.level >= ch.minLevel));
         if (!freeChair) return;
         freeChair.isOccupied = true;
         const name = ['adam', 'alex', 'bob'][Phaser.Math.Between(0, 2)];
-        const customer = this.physics.add.sprite(690, 1070, `${name}_run`).setScale(4.5);
+        const customer = this.physics.add.sprite(width * 0.49, height + 20, `${name}_run`).setScale(4.5);
         customer.customerName = name; customer.targetChair = freeChair; customer.state = 'ARRIVING';
         customer.tx = freeChair.x; customer.ty = freeChair.y;
         customer.bubble = this.add.container(0, 0).setVisible(false).setDepth(200);
@@ -423,14 +443,9 @@ class MainScene extends Phaser.Scene {
             this.isCooking = true;
             this.cookBtn.setVisible(false); this.prosesImg.setVisible(true);
             this.time.delayedCall(3000, () => {
-                this.isCooking = false;
-                this.prosesImg.setVisible(false);
-
-                this.isFoodOnCounter = true;
-                this.counterFoodKey = target.orderedFood;
-                this.counterFoodImg.setTexture(this.counterFoodKey);
-                this.counterFoodSprite.setVisible(true);
-
+                this.isCooking = false; this.prosesImg.setVisible(false);
+                this.isFoodOnCounter = true; this.counterFoodKey = target.orderedFood;
+                this.counterFoodImg.setTexture(this.counterFoodKey); this.counterFoodSprite.setVisible(true);
                 target.state = 'WAITING';
             });
         }
@@ -445,17 +460,14 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-// ==========================================
-// 3. CONFIGURATION POOL (MENGGUNAKAN MODE FIT YANG STABIL)
-// ==========================================
 const config = {
     type: Phaser.AUTO,
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: 1200,
-        height: 700
+        width: '100%',
+        height: '100%'
     },
     pixelArt: true,
     physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
