@@ -177,17 +177,22 @@ class MainScene extends Phaser.Scene {
         addWall(0, 0, 20, realMapHeight);
         addWall(realMapWidth - 20, 0, 20, realMapHeight);
 
-        addWall(realMapWidth * 0.07, realMapHeight * 0.33, realMapWidth * 0.4, realMapHeight * 0.07);
+        // 1. KITCHEN BACK (Lemari, Kompor, Wastafel) -> Diperbesar sampai bawah meja kompor
+        addWall(realMapWidth * 0.03, 0, realMapWidth * 0.45, realMapHeight * 0.28);
+        
+        // 2. KITCHEN FRONT (Meja merah + Bar Stools) -> Diperlebar ke bawah menutupi dudukan kursi bar
+        addWall(realMapWidth * 0.03, realMapHeight * 0.33, realMapWidth * 0.45, realMapHeight * 0.12);
+        
+        // 3. KITCHEN SIDE (Penyambung)
         addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
-        addWall(realMapWidth * 0.07, 0, realMapWidth * 0.4, realMapHeight * 0.23);
 
-        // --- TAMBAHAN COLLISION OBYEK STATIS ---
-        // Jukebox / Mesin Musik di kanan atas
-        addWall(realMapWidth * 0.65, realMapHeight * 0.1, realMapWidth * 0.1, realMapHeight * 0.15);
-        // Tangga di kanan layar
-        addWall(realMapWidth * 0.8, realMapHeight * 0.1, realMapWidth * 0.2, realMapHeight * 0.4);
-        // Mesin Minuman di kanan bawah
-        addWall(realMapWidth * 0.85, realMapHeight * 0.65, realMapWidth * 0.15, realMapHeight * 0.35);
+        // --- COLLISION OBYEK STATIS ---
+        // Jukebox / Mesin Musik di tengah atas
+        addWall(realMapWidth * 0.56, realMapHeight * 0.25, realMapWidth * 0.08, realMapHeight * 0.18);
+        // Tangga di pinggir kanan layar
+        addWall(realMapWidth * 0.88, 0, realMapWidth * 0.12, realMapHeight * 0.45);
+        // Mesin Minuman di pojok kanan bawah
+        addWall(realMapWidth * 0.78, realMapHeight * 0.6, realMapWidth * 0.22, realMapHeight * 0.4);
 
         // --- STATUS GAME ---
         this.coins = 0;
@@ -200,17 +205,19 @@ class MainScene extends Phaser.Scene {
         this.hasFood = false; this.isCooking = false;
 
         this.allChairs = [
-            { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 },
-            { x: realMapWidth * 0.25, y: realMapHeight * 0.66, isOccupied: false, minLevel: 2 },
-            { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
-            { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
+            { x: realMapWidth * 0.08, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 }, // Bar Stool
+            { x: realMapWidth * 0.23, y: realMapHeight * 0.42, isOccupied: false, minLevel: 1 }, // Bar Stool
+            { x: realMapWidth * 0.25, y: realMapHeight * 0.66, isOccupied: false, minLevel: 2 }, // Meja Kiri
+            { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 }, // Meja Kiri
+            { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }  // Meja Kanan
         ];
 
-        // Memblokir area kursi dan meja agar Amelia tidak tembus (Pelanggan tetap tembus karena tidak collider dgn walls)
-        this.allChairs.forEach(ch => {
-            addWall(ch.x - 30, ch.y - 20, 60, 60);
-        });
+        // Memblokir area MEJA BESAR (Bukan per kursi)
+        // Meja Kiri (Ada 4 kursi di sekelilingnya)
+        addWall(realMapWidth * 0.06, realMapHeight * 0.48, realMapWidth * 0.24, realMapHeight * 0.22);
+        
+        // Meja Kanan
+        addWall(realMapWidth * 0.45, realMapHeight * 0.52, realMapWidth * 0.2, realMapHeight * 0.22);
 
         // --- PLAYER (AMELIA) ---
         this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
