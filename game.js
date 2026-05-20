@@ -181,6 +181,14 @@ class MainScene extends Phaser.Scene {
         addWall(realMapWidth * 0.46, realMapHeight * 0.07, 40, realMapHeight * 0.26);
         addWall(realMapWidth * 0.07, 0, realMapWidth * 0.4, realMapHeight * 0.23);
 
+        // --- TAMBAHAN COLLISION OBYEK STATIS ---
+        // Jukebox / Mesin Musik di kanan atas
+        addWall(realMapWidth * 0.65, realMapHeight * 0.1, realMapWidth * 0.1, realMapHeight * 0.15);
+        // Tangga di kanan layar
+        addWall(realMapWidth * 0.8, realMapHeight * 0.1, realMapWidth * 0.2, realMapHeight * 0.4);
+        // Mesin Minuman di kanan bawah
+        addWall(realMapWidth * 0.85, realMapHeight * 0.65, realMapWidth * 0.15, realMapHeight * 0.35);
+
         // --- STATUS GAME ---
         this.coins = 0;
         this.level = 1;
@@ -198,6 +206,11 @@ class MainScene extends Phaser.Scene {
             { x: realMapWidth * 0.15, y: realMapHeight * 0.56, isOccupied: false, minLevel: 3 },
             { x: realMapWidth * 0.55, y: realMapHeight * 0.62, isOccupied: false, minLevel: 4 }
         ];
+
+        // Memblokir area kursi dan meja agar Amelia tidak tembus (Pelanggan tetap tembus karena tidak collider dgn walls)
+        this.allChairs.forEach(ch => {
+            addWall(ch.x - 30, ch.y - 20, 60, 60);
+        });
 
         // --- PLAYER (AMELIA) ---
         this.player = this.physics.add.sprite(realMapWidth * 0.21, realMapHeight * 0.28, 'amelia_idle').setScale(4.5);
@@ -331,7 +344,22 @@ class MainScene extends Phaser.Scene {
         this.customerTimer = this.time.addEvent({ delay: 10000, callback: () => this.spawnCustomer(), loop: true });
         this.spawnCustomer();
 
-        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { if (this.isGamePaused) return; this.coins += m.coinValue; this.gainExp(20); this.updateUI(); m.destroy(); }, null, this);
+        this.physics.add.overlap(this.player, this.moneyGroup, (p, m) => { 
+            if (this.isGamePaused || m.isCollected) return; 
+            m.isCollected = true; // Biar gak ke-trigger berkali-kali
+            this.coins += m.coinValue; 
+            this.gainExp(20); 
+            this.updateUI(); 
+
+            // Efek pop-up text jumlah uang
+            let popText = this.add.text(p.x, p.y - 40, `+${m.coinValue}`, { fontSize: '24px', fill: '#ffd54f', fontStyle: 'bold' }).setOrigin(0.5).setDepth(2000);
+            this.tweens.add({ targets: popText, y: popText.y - 60, alpha: 0, duration: 1000, onComplete: () => popText.destroy() });
+
+            // Efek UI koin berdetak sebentar
+            this.tweens.add({ targets: this.coinText, scaleX: 1.2, scaleY: 1.2, yoyo: true, duration: 150 });
+
+            m.destroy(); 
+        }, null, this);
 
         this.isFoodOnCounter = false; this.counterFoodKey = '';
         this.counterFoodSprite = this.add.container(realMapWidth * 0.33, realMapHeight * 0.31).setVisible(false).setDepth(80);
@@ -426,6 +454,24 @@ class MainScene extends Phaser.Scene {
                     });
                 }
             } else if (c.state === 'LEAVING' && c.y > realMapHeight) { c.bubble.destroy(); c.destroy(); }
+        });
+
+        // Efek Koin Magnetik
+        this.moneyGroup.getChildren().forEach(m => {
+            if (m.isCollected) return;
+
+            let dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y);
+            if (dist < 180) { // Jarak tarikan magnet
+                this.physics.moveToObject(m, this.player, 400); // Koin melayang ke pemain
+                
+                // Animasi trail emas di belakang koin
+                if (Math.random() > 0.5) {
+                    let trail = this.add.sprite(m.x, m.y, 'coin').setScale(2).setAlpha(0.6).setDepth(150);
+                    this.tweens.add({ targets: trail, alpha: 0, scale: 0.5, duration: 300, onComplete: () => trail.destroy() });
+                }
+            } else {
+                m.setVelocity(0); // Diam di meja kalau jauh
+            }
         });
     }
 
