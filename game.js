@@ -134,7 +134,7 @@ class MainScene extends Phaser.Scene {
         const height = this.scale.height;
         this.isGamePaused = false;
 
-        // KUNCI RESOLUSI MAP STATIS (Biar kamera mendeteksi area luar & mau bergerak follow)
+        // KUNCI RESOLUSI MAP STATIS (Biar dunianya luas & kamera aktif mendeteksi area luar)
         this.MAP_WIDTH = 1600;
         this.MAP_HEIGHT = 1200;
 
@@ -182,7 +182,7 @@ class MainScene extends Phaser.Scene {
         this.level = 1;
         this.exp = 0;
         this.expToNextLevel = 50;
-        this.baseSpeed = 350; // Kecepatan dinaikkan sedikit agar gerak di map luas terasa pas
+        this.baseSpeed = 350; // Pergerakan dinaikkan dikit agar lincah di map luas
         this.foodPrices = { 'food_coffee': 5, 'food_burger': 10, 'food_croissant': 15, 'food_cake': 30 };
         this.foodOptions = ['food_coffee'];
         this.hasFood = false; this.isCooking = false;
@@ -203,9 +203,10 @@ class MainScene extends Phaser.Scene {
         this.player.play('idle_down');
         this.physics.add.collider(this.player, this.walls);
 
-        // --- KUNCI TOTAL: KAMERA SAKTI MENGIKUTI AMELIA ---
+        // --- SETTING KAMERA UTK FOLLOW AMELIA & ZOOM LEBIH DEKAT ---
         this.cameras.main.setBounds(0, 0, this.MAP_WIDTH, this.MAP_HEIGHT);
         this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
+        this.cameras.main.setZoom(1.6); // 🌸 MAP KAFE NGE-ZOOM LEBIH DEKAT & TETAP MEMBUNTUTI AMELIA!
 
         this.cursors = this.input.keyboard.addKeys('W,A,S,D');
         this.pauseKeyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
